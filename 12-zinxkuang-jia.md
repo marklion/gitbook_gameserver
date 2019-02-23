@@ -10,6 +10,8 @@ github路径：https://github.com/marklion/Game_zinx
 
 2. 运行文档中的案例并做一定扩展
 
+**小结：** zinx框架用于实现通用的IO事物处理。在zinx框架下实现功能时，应该将功能分解成四个部分（IO，协议，消息，角色）后分别由四个类（AChannel, Aprotocol, Amessage, Arole）的派生类实现。
+
 ## 1.2.2 tcp封包处理实现
 
 **问题**：tcp或类似的流式文件无法保证收到的数据按照期望的格式分割。
@@ -34,7 +36,7 @@ github路径：https://github.com/marklion/Game_zinx
 bool Aprotocol::response2raw(const Response * pstResp, RawData * pstData);
 
 + 绑定myprotolcol对象到tcp的channel对象（tcp数据将会自动被myprotolcol处理）
-+ 定义myrole继承Arole类，重写proc_msg方法，实现回传tcp消息
++ 定义myrole继承Arole类，重写proc_msg方法，实现回传tcp消息的功能
 
 
 
