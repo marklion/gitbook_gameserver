@@ -44,7 +44,7 @@ github路径：[https://github.com/marklion/Game\_zinx](https://github.com/markl
 
 * 绑定myProtolcol对象到tcp的channel对象（tcp数据将会自动被myprotolcol处理）
 
-**结构图：**
+**结构图：**  
 ![](/assets/设计结构.png)
 
 ```cpp
@@ -326,5 +326,7 @@ send to 5:03 00 00 00 00 00 00 00 56 34 12
 #测试OK
 ```
 
-
+**小结：**
+1. zinx框架的用法浓缩为：重写四个类。
+2. 面向对象思想的设计理念：将过程拆解成小段，由多种角色承担。
 
