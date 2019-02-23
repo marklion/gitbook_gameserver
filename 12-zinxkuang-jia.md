@@ -44,18 +44,20 @@ github路径：[https://github.com/marklion/Game\_zinx](https://github.com/markl
 
 * 绑定myProtolcol对象到tcp的channel对象（tcp数据将会自动被myprotolcol处理）
 
-```C++
+```cpp
 #include "zinx/zinx.h"
 #include <string>
 #include <algorithm>
 
 using namespace std;
 
+/*定义myMessage类继承Amessage并添加成员变量msg_content存储消息内容*/
 class myMessage:public Amessage{
 public:
     string msg_content;
 };
 
+/*定义myRole类继承Arole，重写proc_msg函数*/
 class myRole:public Arole{
 public:
     virtual bool init()
@@ -65,26 +67,43 @@ public:
     virtual void fini()
     {
     }
+    
+    /*该函数实现了反转源消息并回传的功能*/
     virtual bool proc_msg(Amessage * pxMsg)
     {
         bool bRet = false;
+        
+        /*动态类型转换，记得判断返回值*/
         myMessage *pxMyMsg = dynamic_cast<myMessage *>(pxMsg);
         Response stResp;
         if (NULL != pxMyMsg)
         {
+            /*拷贝构造源消息对象，用于回传给发送者*/
             myMessage *pxEchoMsg = new myMessage(*pxMyMsg);
+            /*调用通用算法库反转用于回传的消息*/
             reverse(pxEchoMsg->msg_content.begin(), pxEchoMsg->msg_content.end());
+            /*拼装发送对象，包含待发送的消息和发送者*/
             stResp.pxMsg = pxEchoMsg;
             stResp.pxSender = this;
+            /*调用server的发送函数将请求发出去*/
             bRet = Server::GetServer()->send_resp(&stResp);
         }
     }
 };
 
+/*定义myProtocol类继承Aprotocol实现数据到和消息的互相转化*/
 class myProtocol:public Aprotocol{
 private:
+    /*用于暂存当前收到的报文*/
     RawData stCurBuffer;
+    /*用于绑定处理消息的角色对象*/
     myRole *pxBindRole = NULL;
+    
+    /**********************
+    描述：获取小字节序的整数
+    参数：pucData是输入数据起始地址
+    返回值：转换后的整数
+    **********************/
     int GetLittleEndNumber(const unsigned char *pucData)
     {
         int iRet = 0;
@@ -95,6 +114,13 @@ private:
 
         return iRet;
     }
+    
+    /**********************
+    描述：设置小字节序的整数
+    参数：
+        _Num是待转换的整数
+        pucData是输出数据起始地址
+    **********************/
     void SetLittleEndNumber(int _Num, unsigned char *pucData)
     {
         pucData[0] = _Num & 0xff;
