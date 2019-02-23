@@ -67,12 +67,12 @@ public:
     virtual void fini()
     {
     }
-    
+
     /*该函数实现了反转源消息并回传的功能*/
     virtual bool proc_msg(Amessage * pxMsg)
     {
         bool bRet = false;
-        
+
         /*动态类型转换，记得判断返回值*/
         myMessage *pxMyMsg = dynamic_cast<myMessage *>(pxMsg);
         Response stResp;
@@ -98,7 +98,7 @@ private:
     RawData stCurBuffer;
     /*用于绑定处理消息的角色对象*/
     myRole *pxBindRole = NULL;
-    
+
     /**********************
     描述：获取小字节序的整数
     参数：pucData是输入数据起始地址
@@ -114,7 +114,7 @@ private:
 
         return iRet;
     }
-    
+
     /**********************
     描述：设置小字节序的整数
     参数：
@@ -128,6 +128,14 @@ private:
         pucData[2] = (_Num >> 16) & 0xff;
         pucData[3] = (_Num >> 24) & 0xff;
     }
+
+    /**********************
+    描述：将原始数据转化成消息
+    参数：
+        pucParseBegin是消息内容字段的起始地址
+        iLengthLast是消息内容的长度
+    返回值：基于报文创建的消息对象（堆对象）
+    **********************/
     myMessage *GetMessageFromRaw(const unsigned char *pucParseBegin, int iLengthLast)
     {
         myMessage *pstRet = NULL;
@@ -138,42 +146,58 @@ private:
         return pstRet;
     }
 public:
+
+    /*通过构造函数指定当前协议绑定的处理角色*/
     myProtocol(myRole *_bindRole):pxBindRole(_bindRole)
     {
     }
+
+    /*析构时，还需要从server中摘除并销毁绑定的角色对象*/
     virtual ~myProtocol()
     {
         if (NULL != pxBindRole)
         {
+            Server::GetServer()->del_role("myRole", pxBindRole);
             delete pxBindRole;
         }
     }
+
+    /*封包的核心逻辑*/
     virtual bool raw2request(const RawData * pstData, std :: list < Request * > & _ReqList)
     {
         bool bRet = false;
-        int iCurPos = 0;
+        int iCurPos = 0;//记录当前数据处理的游标
 
+        /*先将新收到的数据追击到之前缓存的对象中*/
         stCurBuffer.AppendData(pstData);
-        iCurPos = 0;
+
+        /*循环处理缓存对象中的数据，当数据长度小于8时退出*/
         while (8 < (stCurBuffer.iLength - iCurPos))
         {
             unsigned char *pucParseBegin = stCurBuffer.pucData + iCurPos;
+            /*获取后续消息内容的长度*/
             int iNewMsgLength = GetLittleEndNumber(pucParseBegin);
+            /*若缓冲区内的未处理数据长度小于报文中定义的消息长度时（不完整），退出循环，等待下次数据到来后重新处理*/
             if (stCurBuffer.iLength - iCurPos < 8 + iNewMsgLength)
                 break;
-
+            /*按照报文中获取的长度构造消息对象*/
             myMessage *pstNewMsg = GetMessageFromRaw(pucParseBegin + 8, iNewMsgLength);
+            /*构造Request对象并添加到输出参数的list中*/
             Request *pstNewReq = new Request();
             pstNewReq->pxMsg = pstNewMsg;
-            pstNewReq->pxProcessor = pxBindRole;
+            pstNewReq->pxProcessor = pxBindRole;//指定处理该消息的角色是绑定角色
             _ReqList.push_back(pstNewReq);
+            /*向后移动游标，循环处理后续数据*/
             iCurPos += iNewMsgLength + 8;
             bRet = true;
         }
+        /*循环退出意味着数据正好处理完或数据不完整，用缓冲区中剩余未处理的数据替换掉原缓冲区数据*/
         stCurBuffer.SetData(stCurBuffer.pucData + iCurPos, stCurBuffer.iLength - iCurPos);
 
         return bRet;
     }
+
+    /*和接收数据的逻辑正好相反，用来执行消息到原始数据的转换*/
     virtual bool response2raw(const Response * pstResp, RawData * pstData)
     {
         bool bRet = false;
@@ -182,11 +206,15 @@ public:
         if (NULL != pxMsg)
         {
             int iMsgContenLen = pxMsg->msg_content.size();
+            /*申请一条报文长度的临时空间*/
             unsigned char *pucTemp = (unsigned char *)calloc(1UL, iMsgContenLen + 8);
             if (NULL != pucTemp)
             {
+                /*将长度设置到最开始的字段*/
                 SetLittleEndNumber(iMsgContenLen, pucTemp);
+                /*将待发送的消息放到第8个位置*/
                 pxMsg->msg_content.copy((char *)(pucTemp + 8), iMsgContenLen, 0);
+                /*将临时空间内的数据设置到输出参数中后释放临时空间*/
                 pstData->SetData(pucTemp, iMsgContenLen + 8);
                 free(pucTemp);
                 bRet = true;
@@ -206,14 +234,17 @@ public:
     {
     }
 
-    //重写TcpAfterConnection
+    //重写TcpAfterConnection，创建TcpDataChannel对象，并将myRole对象，myProtocol对象和TcpDataChannel这三者进行绑定
     virtual bool TcpAfterConnection(int _iDataFd, struct sockaddr_in * pstClientAddr)
     {
         myRole *role = new myRole();
+        /*将新创建的myRole对象添加到server方便管理*/
         Server::GetServer()->add_role("myRole", role);
+        /*创建框架自带的tcp数据处理对象*/
         TcpDataChannel *pxTcpData = new TcpDataChannel(_iDataFd, new myProtocol(role));
+        /*将tcp数据处理对象添加为myRole对象的出口通道*/
         role->SetChannel(pxTcpData);
-        //创建TcpDataChannel对象并添加到server实例中
+        //将TcpDataChannel对象添加到server实例中
         return Server::GetServer()->install_channel(pxTcpData);
     }
 };
@@ -230,5 +261,17 @@ int main()
 }
 ```
 
-
+**测试：** 
+1. 发送一帧完整的请求报文
+    ```shell
+    <----------------------------------------->
+    recv from 5:03 00 00 00 00 00 00 00 12 34 56
+    <----------------------------------------->
+    <----------------------------------------->
+    send to 5:03 00 00 00 00 00 00 00 56 34 12
+    <----------------------------------------->
+    ```
+2. 发送两帧完全的请求报文
+3. 发送半帧请求报文
+4. 发送一帧半请求报文
 
