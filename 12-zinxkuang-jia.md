@@ -44,9 +44,6 @@ github路径：[https://github.com/marklion/Game\_zinx](https://github.com/markl
 
 * 绑定myProtolcol对象到tcp的channel对象（tcp数据将会自动被myprotolcol处理）
 
-**结构图：**
-
-
 ```cpp
 #include "zinx/zinx.h"
 #include <string>
