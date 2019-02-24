@@ -66,6 +66,8 @@ game:*.cpp
 
 GameMessage类继承IdMessage，用来封装各种类型的消息，消息不同，其承载的内容也不同。这里选择protobuf技术，用来解析和封装消息内容（序列化和反序列化）。关于protobuf的使用，我们后边会详细介绍
 
+GameMessage.h文件
+
 ```cpp
 #ifndef _GAME_MESSAGE_H_
 #define _GAME_MESSAGE_H_
@@ -94,6 +96,8 @@ public:
 ## 1.3.3 GameRole类设计
 
 GameRole类继承IdMsgRole，用来处理各种类型的消息。需要重写init函数和fini函数，实现多个消息类型和对应的处理函数的注册，玩家上线后的操作和玩家下线前的操作。
+
+GameRole.h文件
 
 ```cpp
 #ifndef _GAME_ROLE_H_
@@ -128,12 +132,47 @@ public:
 GameProtocol类继承Aprotocol，与上一章的功能没有差别。
 
 ```cpp
+#ifndef _GAME_PROTOCOL_H_
+#define _GAME_PROTOCOL_H_
 
+#include <zinx/zinx.h>
+
+class GameProtocol:public Aprotocol{
+private:
+    /*用于暂存当前收到的报文*/
+    RawData stCurBuffer;
+    /*用于绑定处理消息的角色对象*/
+    GameRole *pxBindRole = NULL;
+
+    /*获取小字节序的整数*/
+    int GetLittleEndNumber(const unsigned char *pucData);
+
+    /*设置小字节序的整数*/
+    void SetLittleEndNumber(int _Num, unsigned char *pucData);
+
+    /*将原始数据转化成消息*/
+    GameMessage *GetMessageFromRaw(const unsigned char *pucParseBegin, int iLengthLast);
+public:
+
+    /*通过构造函数指定当前协议绑定的处理角色*/
+    GameProtocol(GameRole *_bindRole);
+
+    /*析构时，还需要从server中摘除并销毁绑定的角色对象*/
+    virtual ~myProtocol();
+
+    /*封包的核心逻辑*/
+    virtual bool raw2request(const RawData * pstData, std :: list < Request * > & _ReqList);
+    
+    /*和接收数据的逻辑正好相反，用来执行消息到原始数据的转换*/
+    virtual bool response2raw(const Response * pstResp, RawData * pstData);
+};
+
+#endif
 ```
 
 ## 1.3.5 GameChannel类设计
 
-类似之前的例子，GameChannel类应该重写TcpAfterConnection方法，实现通道，协议，角色这三者的绑定和
+GameChannel继承TcpListenChannel，重写TcpAfterConnection方法，实现通道，协议，角色这三者的绑定和添加到server实例。
 
 
 
