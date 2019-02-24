@@ -361,7 +361,92 @@ bool GameChannel::TcpAfterConnection(int _iDataFd, struct sockaddr_in * pstClien
 
 + 为待实现函数打桩
 
+GameMessage.cpp文件
 
+```cpp
+#include "GameMessage.h"
+#include <iostream>
+
+using namespace std;
+
+/*调用父类构造函数*/
+GameMessage::GameMessage(int _id):IdMessage(_id)
+{
+}
+
+/*析构时，要释放pxProtoBufMsg*/
+GameMessage::~GameMessage()
+{
+    if (NULL != pxProtoBufMsg)
+    {
+        delete pxProtoBufMsg;
+        pxProtoBufMsg = NULL;
+    }
+}
+
+bool GameMessage::ParseBuff2Msg(const unsigned char * pucDataBuff, int iLength)
+{
+    bool bRet = false;
+
+    /*仅仅打印一条提示信息，不做真正的报文解析*/
+    cout<<"ParseBuff2Msg is called"<<endl;
+    bRet = true;
+
+    return bRet;
+}
+
+int GameMessage::SerialMsg2Buff(unsigned char * pucDataBuff, int iBufLength)
+{
+    int iRet = 0;
+
+    /*写死，产生的消息内容为0x11 0x22*/
+    pucDataBuff[0] = 0x11;
+    pucDataBuff[1] = 0x22;
+    iRet = 2;
+
+    cout<<"SerialMsg2Buff is called"<<endl;
+
+    return iRet;
+}
+```
+
+GameRole.cpp文件
+
+```cpp
+#include "GameRole.h"
+#include <iostream>
+#include "GameMessage.h"
+
+using namespace std;
+
+class IdProc0Msg:public IIdMsgProc{
+    virtual bool ProcMsg(IdMsgRole * _pxRole, IdMessage * _pxMsg)
+    {
+        cout<<"IdProc0Msg.ProcMsg is called"<<endl;
+        Response stResp;
+
+        /*构造一条ID为1的报文，回复给对应客户端*/
+        stResp.pxMsg = new GameMessage(1);
+        stResp.pxSender = _pxRole;
+        return Server::GetServer()->send_resp(&stResp);
+    }
+};
+
+bool GameRole::init()
+{
+    bool bRet = false;
+
+    cout<<"GameRole object is added to server"<<endl;
+    bRet = register_id_func(0, new IdProc0Msg());    
+
+    return bRet;
+}
+
+void GameRole::fini()
+{
+    cout<<"GameRole object is deled from server"<<endl;
+}
+```
 
 + 模拟真实场景发送报文
 
