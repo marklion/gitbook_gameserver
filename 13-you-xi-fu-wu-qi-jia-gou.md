@@ -83,7 +83,7 @@ public:
     /*构造函数要指定当前消息类型编号*/
     GameMessage(int _id);
     /*析构时，要释放pxProtoBufMsg*/
-    vitual ~GameMessage();
+    virtual ~GameMessage();
     
     /*新增两个成员函数，用于数据和请求直接的转换*/
     bool ParseBuff2Msg(unsigned char *pucDataBuff, int iLength);
