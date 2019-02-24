@@ -100,6 +100,7 @@ GameRole类继承IdMsgRole，用来处理各种类型的消息。需要重写ini
 #define _GAME_ROLE_H_
 
 #include <zinx/zinx.h>
+#include <string>
 
 class GameRole:public IdMsgRole{
 public:
@@ -120,6 +121,14 @@ public:
 };
 
 #endif
+```
+
+## 1.3.4 GameProtocol类设计
+
+GameProtocol类继承Aprotocol，与上一章的功能没有差别。
+
+```cpp
+
 ```
 
 ## 1.3.5 GameChannel类设计
