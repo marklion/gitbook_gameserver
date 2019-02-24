@@ -180,12 +180,178 @@ public:
 GameProtocol.cpp文件
 
 ```cpp
+#include "GameProtocol.h"
 
+using namespace std;
+
+/**********************
+描述：获取小字节序的整数
+参数：pucData是输入数据起始地址
+返回值：转换后的整数
+**********************/
+int GameProtocol::GetLittleEndNumber(const unsigned char * pucData)
+{
+    int iRet = 0;
+    iRet = pucData[0];
+    iRet += pucData[1];
+    iRet += pucData[2];
+    iRet += pucData[3];
+
+    return iRet;
+}
+
+/**********************
+描述：设置小字节序的整数
+参数：
+    _Num是待转换的整数
+    pucData是输出数据起始地址
+    **********************/
+void GameProtocol::SetLittleEndNumber(int _Num, unsigned char * pucData)
+{
+    pucData[0] = _Num & 0xff;
+    pucData[1] = (_Num >> 8) & 0xff;
+    pucData[2] = (_Num >> 16) & 0xff;
+    pucData[3] = (_Num >> 24) & 0xff;
+}
+
+/**********************
+描述：将原始数据转化成消息
+参数：
+    _MsgId是当前消息ID
+    pucParseBegin是消息内容字段的起始地址
+    iLengthLast是消息内容的长度
+返回值：基于报文创建的消息对象（堆对象）
+**********************/
+GameMessage *GameProtocol::GetMessageFromRaw(int _MsgId, const unsigned char * pucParseBegin, int iLengthLast)
+{
+    GameMessage *pstRet = NULL;
+
+    pstRet = new GameMessage(_MsgId);
+    pstRet->ParseBuff2Msg(pucParseBegin, iLengthLast);
+
+    return pstRet;
+}
+
+/*通过构造函数指定当前协议绑定的处理角色*/
+GameProtocol::GameProtocol(GameRole *_bindRole):pxBindRole(_bindRole)
+{
+}
+
+/*析构时，还需要从server中摘除并销毁绑定的角色对象*/
+GameProtocol::~GameProtocol()
+{
+    if (NULL != pxBindRole)
+    {
+        Server::GetServer()->del_role("GameProtocol", pxBindRole);
+        delete pxBindRole;
+    }
+}
+
+/*封包的核心逻辑*/
+bool GameProtocol::raw2request(const RawData * pstData, std :: list < Request * > & _ReqList)
+{
+    bool bRet = false;
+    int iCurPos = 0;//记录当前数据处理的游标
+
+    /*先将新收到的数据追击到之前缓存的对象中*/
+    stCurBuffer.AppendData(pstData);
+
+    /*循环处理缓存对象中的数据，当数据长度小于8时退出*/
+    while (8 < (stCurBuffer.iLength - iCurPos))
+    {
+        unsigned char *pucParseBegin = stCurBuffer.pucData + iCurPos;
+        /*获取后续消息内容的长度*/
+        int iNewMsgLength = GetLittleEndNumber(pucParseBegin);
+        int iNewMsgID = GetLittleEndNumber(pucParseBegin + 4);
+        /*若缓冲区内的未处理数据长度小于报文中定义的消息长度时（不完整），退出循环，等待下次数据到来后重新处理*/
+        if (stCurBuffer.iLength - iCurPos < 8 + iNewMsgLength)
+            break;
+        /*按照报文中获取的长度构造消息对象*/
+        GameMessage *pstNewMsg = GetMessageFromRaw(iNewMsgID, pucParseBegin + 8, iNewMsgLength);
+        /*构造Request对象并添加到输出参数的list中*/
+        Request *pstNewReq = new Request();
+        pstNewReq->pxMsg = pstNewMsg;
+        pstNewReq->pxProcessor = pxBindRole;//指定处理该消息的角色是绑定角色
+        _ReqList.push_back(pstNewReq);
+        /*向后移动游标，循环处理后续数据*/
+        iCurPos += iNewMsgLength + 8;
+        bRet = true;
+    }
+    /*循环退出意味着数据正好处理完或数据不完整，用缓冲区中剩余未处理的数据替换掉原缓冲区数据*/
+    stCurBuffer.SetData(stCurBuffer.pucData + iCurPos, stCurBuffer.iLength - iCurPos);
+
+    return bRet;
+}
+
+/*和接收数据的逻辑正好相反，用来执行消息到原始数据的转换*/
+bool GameProtocol::response2raw(const Response * pstResp, RawData * pstData)
+{
+    bool bRet = false;
+    GameMessage *pxMsg = dynamic_cast<GameMessage *>(pstResp->pxMsg);
+
+    if (NULL != pxMsg)
+    {
+        /*创建临时缓冲区存放消息内容序列化后的数据*/
+        unsigned char aucBuffer[2048] = {0};
+        /*从第8个字节开始存放消息内容序列化的数据*/
+        int iMsgContenLen = pxMsg->SerialMsg2Buff(aucBuffer + 8, sizeof(aucBuffer) - 8);
+        /*将长度设置到最开始的字段*/
+        SetLittleEndNumber(iMsgContenLen, aucBuffer);
+        /*将类型ID设置到第4个位置*/
+        SetLittleEndNumber(pxMsg->Id, aucBuffer + 4);
+        /*将临时空间内的数据设置到输出参数中*/
+        bRet = pstData->SetData(aucBuffer, iMsgContenLen + 8);
+    }
+
+    return bRet;
+}
 ```
 
 ## 1.3.5 GameChannel类设计
 
 GameChannel继承TcpListenChannel，重写TcpAfterConnection方法，实现通道，协议，角色这三者的绑定和添加到server实例。
+GameChannel.h文件
+
+```cpp
+#ifndef _GAME_CHANNEL_H_
+#define _GAME_CHANNEL_H_
+
+#include <zinx/zinx.h>
+
+class GameChannel:public TcpListenChannel{
+public:
+    GameChannel();
+    virtual bool TcpAfterConnection(int _iDataFd, struct sockaddr_in * pstClientAddr);
+};
+
+#endif
+```
+
+GameChannel.cpp文件
+```cpp
+#include "GameChannel.h"
+#include "GameRole.h"
+#include "GameProtocol.h"
+
+//调用父类构造函数指定监听端口为8899
+GameChannel::GameChannel():TcpListenChannel(8899)
+{
+}
+
+//重写TcpAfterConnection，创建TcpDataChannel对象，并将GameRole对象，GameProtocol对象和TcpDataChannel这三者进行绑定
+bool GameChannel::TcpAfterConnection(int _iDataFd, struct sockaddr_in * pstClientAddr)
+{
+    GameRole *role = new GameRole();
+    /*将新创建的GameRole对象添加到server方便管理*/
+    Server::GetServer()->add_role("GameRole", role);
+    /*创建框架自带的tcp数据处理对象*/
+    TcpDataChannel *pxTcpData = new TcpDataChannel(_iDataFd, new GameProtocol(role));
+    /*将tcp数据处理对象添加为myRole对象的出口通道*/
+    role->SetChannel(pxTcpData);
+    //将TcpDataChannel对象添加到server实例中
+    return Server::GetServer()->install_channel(pxTcpData);
+}
+```
 
 
 
