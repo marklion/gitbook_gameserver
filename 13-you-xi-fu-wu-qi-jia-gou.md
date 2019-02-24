@@ -55,24 +55,76 @@ int main()
 }
 ```
 
-## 1.3.1 上下线
+Makefile文件内，编译链接所有cpp文件为game可执行文件。
 
-简单讲：收到TCP连接代表登陆，连接断开代表下线。  
-套用到之前四个类的设计思路，我们用TCPDataCHannel对象维护和客户端的两连接，绑定协议对象和角色对象，实现数据处理。继承TCPLstChannel类实现连接建立后的相关处理对象实例化。
-
-```bash
-game/
-├── GameChannel.cpp
-├── GameChannel.h
-├── GameMessage.cpp
-├── GameMessage.h
-├── GameProtocol.cpp
-├── GameProtocol.h
-├── GameRole.cpp
-├── GameRole.h
-├── main.cpp
-└── Makefile
+```Makefile
+game:*.cpp
+	g++ -std=c++11 $^ -lzinx -o $@
 ```
+
+## 1.3.2 GameMessage类设计
+
+GameMessage类继承IdMessage，用来封装各种类型的消息，消息不同，其承载的内容也不同。这里选择protobuf技术，用来解析和封装消息内容（序列化和反序列化）。关于protobuf的使用，我们后边会详细介绍
+
+```cpp
+#ifndef _GAME_MESSAGE_H_
+#define _GAME_MESSAGE_H_
+
+#include <zinx/zinx.h>
+#include <google/protobuf/message.h>
+
+class GameMessage:public IdMessage{
+public:
+    /*新增属性pxProtoBufMsg用于存放消息内容*/
+    google::protobuf::Message *pxProtoBufMsg = NULL;
+
+    /*构造函数要指定当前消息类型编号*/
+    GameMessage(int _id);
+    /*析构时，要释放pxProtoBufMsg*/
+    vitual ~GameMessage();
+    
+    /*新增两个成员函数，用于数据和请求直接的转换*/
+    bool ParseBuff2Msg(unsigned char *pucDataBuff, int iLength);
+    int SerialMsg2Buff(unsigned char *pucDataBuff, int iBufLength);
+};
+
+#endif
+```
+
+## 1.3.3 GameRole类设计
+
+GameRole类继承IdMsgRole，用来处理各种类型的消息。需要重写init函数和fini函数，实现多个消息类型和对应的处理函数的注册，玩家上线后的操作和玩家下线前的操作。
+
+```cpp
+#ifndef _GAME_ROLE_H_
+#define _GAME_ROLE_H_
+
+#include <zinx/zinx.h>
+
+class GameRole:public IdMsgRole{
+public:
+    /*记录玩家的唯一ID*/
+    int iPid = 0;
+    /*玩家的所在位置*/
+    float x = 0;
+    float y = 0;
+    float z = 0;
+    float v = 0;
+    /*玩家的昵称*/
+    std::string szName;
+    
+    /*init函数实现消息处理函数的注册和玩家上线后的数据同步*/
+    virtual bool init();
+    /*fini函数实现玩家退出前的善后*/
+    virtual void fini();
+};
+
+#endif
+```
+
+## 1.3.5 GameChannel类设计
+
+类似之前的例子，GameChannel类应该重写TcpAfterConnection方法，实现通道，协议，角色这三者的绑定和
 
 
 
