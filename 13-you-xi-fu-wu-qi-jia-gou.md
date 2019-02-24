@@ -450,4 +450,26 @@ void GameRole::fini()
 
 + 模拟真实场景发送报文
 
+```bash
+GameRole object is added to server #创建GameRole对象OK
+++++++++++++++++++++++++++++++
+new tcp connection, fd = 5
+++++++++++++++++++++++++++++++
+<----------------------------------------->
+recv from 5:03 00 00 00 00 00 00 00 12 34 56
+<----------------------------------------->
+ParseBuff2Msg is called         #GameProtocol解析报文OK
+IdProc0Msg.ProcMsg is called    #序号为0的消息被调用OK
+SerialMsg2Buff is called        #GameProtocol序列化报文OK
+<----------------------------------------->
+send to 5:02 00 00 00 01 00 00 00 11 22
+<----------------------------------------->
+<----------------------------------------->
+recv from 5:
+<----------------------------------------->
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+5 is hangup
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+GameRole object is deled from server  #断链后GameRole对象摘除OK
+```
 
