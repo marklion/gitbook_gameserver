@@ -129,13 +129,20 @@ public:
 
 ## 1.3.4 GameProtocol类设计
 
-GameProtocol类继承Aprotocol，与上一章的功能没有差别。
+GameProtocol类继承Aprotocol，与上一章的功能基本没有差别。需要增加：
+
++ 创建Amessage对象时要调用GameMessage的解析函数
++ 构造原始数据时要调用GameMessage的序列化函数
+
+GameProtocol.h文件
 
 ```cpp
 #ifndef _GAME_PROTOCOL_H_
 #define _GAME_PROTOCOL_H_
 
 #include <zinx/zinx.h>
+#include "GameMessage.h"
+#include "GameRole.h"
 
 class GameProtocol:public Aprotocol{
 private:
@@ -168,6 +175,12 @@ public:
 };
 
 #endif
+```
+
+GameProtocol.cpp文件
+
+```cpp
+
 ```
 
 ## 1.3.5 GameChannel类设计
