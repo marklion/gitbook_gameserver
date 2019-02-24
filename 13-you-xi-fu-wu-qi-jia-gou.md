@@ -86,7 +86,7 @@ public:
     virtual ~GameMessage();
     
     /*新增两个成员函数，用于数据和请求直接的转换*/
-    bool ParseBuff2Msg(unsigned char *pucDataBuff, int iLength);
+    bool ParseBuff2Msg(const unsigned char *pucDataBuff, int iLength);
     int SerialMsg2Buff(unsigned char *pucDataBuff, int iBufLength);
 };
 
