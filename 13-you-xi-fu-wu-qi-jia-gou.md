@@ -242,7 +242,7 @@ GameProtocol::~GameProtocol()
 {
     if (NULL != pxBindRole)
     {
-        Server::GetServer()->del_role("GameProtocol", pxBindRole);
+        Server::GetServer()->del_role("GameRole", pxBindRole);
         delete pxBindRole;
     }
 }
@@ -360,6 +360,9 @@ bool GameChannel::TcpAfterConnection(int _iDataFd, struct sockaddr_in * pstClien
 **测试方法：**
 
 + 为待实现函数打桩
+
+
+
 + 模拟真实场景发送报文
 
 
