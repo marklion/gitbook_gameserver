@@ -158,7 +158,7 @@ private:
     void SetLittleEndNumber(int _Num, unsigned char *pucData);
 
     /*将原始数据转化成消息*/
-    GameMessage *GetMessageFromRaw(const unsigned char *pucParseBegin, int iLengthLast);
+    GameMessage *GetMessageFromRaw(int _MsgId, const unsigned char *pucParseBegin, int iLengthLast);
 public:
 
     /*通过构造函数指定当前协议绑定的处理角色*/
