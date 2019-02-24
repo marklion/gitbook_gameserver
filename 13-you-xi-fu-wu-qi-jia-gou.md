@@ -165,7 +165,7 @@ public:
     GameProtocol(GameRole *_bindRole);
 
     /*析构时，还需要从server中摘除并销毁绑定的角色对象*/
-    virtual ~myProtocol();
+    virtual ~GameProtocol();
 
     /*封包的核心逻辑*/
     virtual bool raw2request(const RawData * pstData, std :: list < Request * > & _ReqList);
