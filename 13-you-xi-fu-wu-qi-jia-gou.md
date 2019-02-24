@@ -62,6 +62,10 @@ game:*.cpp
 	g++ -std=c++11 $^ -lzinx -o $@
 ```
 
+**小结：**
+1. 不同的类放到不同的文件利于维护
+2. 面向对象的开发思路：总-》分
+
 ## 1.3.2 GameMessage类设计
 
 GameMessage类继承IdMessage，用来封装各种类型的消息，消息不同，其承载的内容也不同。这里选择protobuf技术，用来解析和封装消息内容（序列化和反序列化）。关于protobuf的使用，我们后边会详细介绍
@@ -472,4 +476,8 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 GameRole object is deled from server  #断链后GameRole对象摘除OK
 ```
+
+**小结**：
+1. 软件架构搭建完成后，应该通过打桩测试架构可用性
+2. 实现具体类时，应随写随测。
 
