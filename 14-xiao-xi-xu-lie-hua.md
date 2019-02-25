@@ -76,6 +76,11 @@ $ sudo ldconfig # refresh shared library cache.
 
 创建test.proto文件用于定义消息结构，protobuf支持的数据类型和C语言的数据类型相似，风格和结构体的风格也类似。
 
++ `message{}`关键字用于定义一个消息类型，大括号内放置消息包含的成员。
++ 消息结构的成员定义方法：`[repeated] 数据类型 = 成员编号;`,repeated 代表该成员可以有多个；不写repeated代表该成员只有一个。
+
+创建test.proto文件
+
 ```protobuf
 //指定当前proto文件的语法是3系列版本
 syntax="proto3";
@@ -89,8 +94,8 @@ message Student {
 }
 ```
 
-+ `message{}`关键字用于定义一个消息类型，大括号内放置消息包含的成员。
-+ 消息结构的成员定义方法：`[repeated] 数据类型 = 成员编号;`,repeated 代表该成员可以有多个；不写repeated代表该成员只有一个。
+**扩展**：
+
 + protobuf支持的数据类型包括：数字型（int32 double等）和字符串型（string bytes等），详细：[https://developers.google.com/protocol-buffers/docs/proto3\#scalar](https://developers.google.com/protocol-buffers/docs/proto3#scalar)
 + protobuf支持定义更复杂的消息结构：
   - 消息类型直接可以嵌套
@@ -115,7 +120,13 @@ message Student {
   }
   ```
 
+#### 第三步 生成代码
 
+命令protoc可以基于我们编写的proto文件生成各种语言的原文件。在这里我们生成c++文件。
+
+```bash
+
+```
 
 **小结：**
 
