@@ -225,7 +225,76 @@ int main()
 2. protobuf使用了Varint技术，使得小的数字不会占用无用空间。详细：[https://developers.google.com/protocol-buffers/docs/encoding](https://developers.google.com/protocol-buffers/docs/encoding)
 3. 只要遵守protobuf推荐的消息定义方式，protobuf可以保证消息处理的向前兼容。
 
-## 1.4.2
+## 1.4.2 游戏消息实现
+
+参照之前需求分析时的表格，我们给每种类型的消息起个名字：
+
+| 消息ID | 消息内容 | 消息类名 |
+| --- | --- | --- |
+| 1 | 玩家ID和玩家姓名 | SyncPid |
+| 2 | 聊天内容 | Talk |
+| 3 | 新位置 | Position |
+| 200 | 玩家ID，聊天内容/初始位置/动作（预留）/新位置 | BroadCast |
+| 201 | 玩家ID和玩家姓名 | SyncPid |
+| 202 | 周围玩家们的位置 | SyncPlayers |
+
+每个类型的消息详细定义如下（客户端已经定义好了）：
+
+```protobuf
+syntax="proto3";
+package pb;
+//无关选项，用于客户端
+option csharp_namespace="Pb";
+
+message SyncPid{
+	int32 Pid=1;
+	string Username=2;
+}
+
+message Player{
+	int32 Pid=1;
+	Position P=2;
+	string Username=3;
+}
+
+message SyncPlayers{
+        /*嵌套多个子消息类型Player的消息*/
+	repeated Player ps=1;
+}
+
+message Position{
+	float X=1;
+	float Y=2;
+	float Z=3;
+	float V=4;
+	int32 BloodValue=5;
+}
+
+message MovePackege{
+	Position P=1;
+	int32 ActionData=2;
+}
+
+message BroadCast{
+	int32 Pid=1;
+	int32 Tp=2;
+	/*根据Tp不同，BroadCast消息会包含：
+	聊天内容（Content）或初始位置(P)或新位置P*/
+	oneof Data {
+            string Content=3;
+            Position P=4;
+            /*ActionData暂时预留*/
+	    int32 ActionData=5;
+        }
+	string Username=6;
+}
+
+
+message Talk{
+	string Content=1;
+}
+```
+
 
 
 
