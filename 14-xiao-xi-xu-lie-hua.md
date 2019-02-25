@@ -76,8 +76,8 @@ $ sudo ldconfig # refresh shared library cache.
 
 创建test.proto文件用于定义消息结构，protobuf支持的数据类型和C语言的数据类型相似，风格和结构体的风格也类似。
 
-+ `message{}`关键字用于定义一个消息类型，大括号内放置消息包含的成员。
-+ 消息结构的成员定义方法：`[repeated] 数据类型 = 成员编号;`,repeated 代表该成员可以有多个；不写repeated代表该成员只有一个。
+* `message{}`关键字用于定义一个消息类型，大括号内放置消息包含的成员。
+* 消息结构的成员定义方法：`[repeated] 数据类型 = 成员编号;`,repeated 代表该成员可以有多个；不写repeated代表该成员只有一个。
 
 创建test.proto文件
 
@@ -96,29 +96,29 @@ message Student {
 
 **扩展**：
 
-+ protobuf支持的数据类型包括：数字型（int32 double等）和字符串型（string bytes等），详细：[https://developers.google.com/protocol-buffers/docs/proto3\#scalar](https://developers.google.com/protocol-buffers/docs/proto3#scalar)
-+ protobuf支持定义更复杂的消息结构：
-  - 消息类型直接可以嵌套
-  ```protobuf
-  message A {
+* protobuf支持的数据类型包括：数字型（int32 double等）和字符串型（string bytes等），详细：[https://developers.google.com/protocol-buffers/docs/proto3\#scalar](https://developers.google.com/protocol-buffers/docs/proto3#scalar)
+* protobuf支持定义更复杂的消息结构：
+  * 消息类型直接可以嵌套
+    ```protobuf
+    message A {
       int32 no=1;
-  }
-  message B {
+    }
+    message B {
       string content=1;
       //消息类型B中包含消息类型A的一个实体
       A sub_message=2;
-  }
-  ```
-  - `Oneof`关键字用于指定消息包含多种数据类型之一。
-  ```protobuf
-  message B {
+    }
+    ```
+  * `Oneof`关键字用于指定消息包含多种数据类型之一。
+    ```protobuf
+    message B {
       //消息类型B中要么包含字符串content，要么包含一个子类型A的sub_message
       Oneof data {
           string content=1;
           A sub_message=2;
       }
-  }
-  ```
+    }
+    ```
 
 #### 第三步 生成代码
 
@@ -128,14 +128,75 @@ message Student {
 # 参数1 指定我们要生成的c++文件放到哪里
 # 参数2 指定proto文件
 $ protoc --cpp_out=./ test.proto
-# 执行成功后会生成两个文件
-# test.pb.h文件中定义了pb_sample::Student类
-# test.pb.cc中实现了pb_sample::Student类中数据序列化和解析的函数
+# 执行成功后会生成两个新文件
 $ ls
 test.pb.cc  test.pb.h  test.proto
 ```
 
+* test.pb.h文件中定义了pb_sample::Student类
+* test.pb.cc中实现了pb_sample::Student类中数据序列化和解析的函数
 
+#### 第四步 编译并测试
+
+**测试用例：** 创建Student对象并设置其No=1，Name="abc".序列化该对象后打印字节流。
+
+main.cpp
+
+```cpp
+#include <cstdio>
+#include "test.pb.h"
+#include <string>
+
+using namespace std;
+
+int main()
+{
+    /*创建消息对象s*/
+    pb_sample::Student s;
+    
+    /*调用set函数设置消息内容*/
+    s.set_no(1);
+    s.set_name("abc");
+
+    string out;
+    
+    /*将s序列化成字节流，并打印出来*/
+    s.SerializeToString(&out);
+
+    for (int i = 0; i < out.size(); i++)
+    {
+        printf("%02x ", out[i]);
+    }
+    puts("");
+
+    return 0;
+}
+```
+
+**编译：**
+
+查看protobuf的编译选项
+
+```bash
+$ pkg-config --cflags protobuf
+-pthread
+```
+
+查看protobuf的链接选项
+
+```bash
+$ pkg-config --libs  protobuf
+-lprotobuf -pthread
+```
+
+编译测试文件(main.cpp)和消息类文件(test.pb.cc)并测试
+
+```bash
+$ g++ -std=c++11 -pthread main.cpp test.pb.cc -lprotobuf
+$ ./a.out
+08 01 12 03 61 62 63
+#测试OK
+```
 
 **小结：**
 
