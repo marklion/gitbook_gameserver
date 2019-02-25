@@ -137,7 +137,9 @@ test.pb.cc  test.pb.h  test.proto
 * test.pb.cc中实现了pb\_sample::Student类中数据序列化和解析的函数
   * `bool ParseFromArray(const void * data, int size)` 函数将长度为size的字节流缓冲区解析成消息对象。
   * `bool ParseFromString(const string & data)` 函数将data这个字符串内容（本质上还是不可阅读的字节流）解析为消息对象。
-  * ``
+  * `bool SerializeToArray(void * data, int size) const`函数将消息对象转换成字节流存到data开头长度为size的缓冲区里
+  * `bool SerializeToString(string * output) const`函数将消息对象转换成字节流存到output这个字符串中
+  * `size_t ByteSizeLong()`函数用于获取序列化后的缓冲区长度
 
 #### 第四步 编译并测试
 
