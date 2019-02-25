@@ -327,4 +327,4 @@ msg.proto
 
 + 属性pxProtoBufMsg用来存消息内容对象：protobuf生成的SyncPid，Position和BroadCast等类都是google::protobuf::Message的子类。
 + 构造函数内，需要根据消息ID不同，创建不同的google::protobuf::Message的子类对象（SyncPid，Position和BroadCast等）
-+ 成员函数ParseBuff2Msg
++ 成员函数ParseBuff2Msg负责
