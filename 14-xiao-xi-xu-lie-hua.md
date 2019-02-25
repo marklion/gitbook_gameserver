@@ -24,7 +24,7 @@
 
 **资料：**
 + 项目仓库：https://github.com/protocolbuffers/protobuf
-+ 官方文档：https://developers.google.com/protocol-buffers/docs/overview
++ 官方文档(科学上网)：https://developers.google.com/protocol-buffers/docs/overview
 
 **原理**：将结构体的成员转换成TLV（Tag Length Value）单元后合并成整段不可阅读流（binary stream）。
 
