@@ -198,6 +198,27 @@ $ ./a.out
 #测试OK
 ```
 
+**练习：**
+
+完成以下代码片段，将缓冲区内的数据转换成消息对象s，并打印两个成员变量的值。
+
+```cpp
+#include "test.pb.h"
+#include <string>
+#include <iostream>
+
+using namespace std;
+
+int main()
+{
+    char aucBuff[] = {0x08, 0x01, 0x12, 0x03, 0x61, 0x62, 0x63};
+    
+    /*TODO: 将aucBuff内的数据解析成对象并打印内容*/    
+        
+    return 0;
+}
+```
+
 **小结：**
 
 1. protobuf序列化后的数据时不可阅读流，是保证健壮的情况下占用空间最小的形式（相比xml json）。
