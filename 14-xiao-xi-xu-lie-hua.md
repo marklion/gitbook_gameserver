@@ -59,7 +59,8 @@ $ sudo apt-get install autoconf automake libtool curl make g++ unzip
 
 ```
 
-访问https://github.com/protocolbuffers/protobuf/releases/latest下载某个发布版本`protobuf-cpp-[VERSION].tar.gz`
+访问https://github.com/protocolbuffers/protobuf/releases/latest
+下载某个发布版本`protobuf-cpp-[VERSION].tar.gz`
 
 ```bash
 $ ./configure
@@ -70,6 +71,27 @@ $ sudo ldconfig # refresh shared library cache.
 ```
 
 可以敲出protoc命令则意味着安装成功
+
+#### 第二步 编写proto文件
+
+创建test.proto文件用于定义消息结构，protobuf支持的数据类型和C语言的数据类型相似，风格和结构体的风格也类似。
+
+```protobuf
+//指定当前proto文件的语法是3系列版本
+syntax="proto3";
+//指定生成代码后，相关结构定义所在的命名空间
+package pb_sample;
+//消息定义
+message Student {
+    //数字1 2 是消息成员的序号，要求按顺序编排，若后续新增成员则序号依次递增
+    int32 No = 1;
+    string Name = 2;
+}
+```
+
+> protobuf支持的数据类型包括：数字型（int32 double等）和字符串型（string bytes等），详细：https://developers.google.com/protocol-buffers/docs/proto3#scalar
+
+
 
 **小结：** 
 
