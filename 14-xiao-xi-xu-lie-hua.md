@@ -135,6 +135,9 @@ test.pb.cc  test.pb.h  test.proto
 
 * test.pb.h文件中定义了pb\_sample::Student类
 * test.pb.cc中实现了pb\_sample::Student类中数据序列化和解析的函数
+  * `bool ParseFromArray(const void * data, int size)` 函数将长度为size的字节流缓冲区解析成消息对象。
+  * `bool ParseFromString(const string & data)` 函数将data这个字符串内容（本质上还是不可阅读的字节流）解析为消息对象。
+  * ``
 
 #### 第四步 编译并测试
 
@@ -314,10 +317,12 @@ GameMessage.cpp
 GameProtocol.cpp  
 GameRole.cpp    
 main.cpp    
-msg.pb.cc  
+msg.pb.cpp  
 msg.proto
 ```
 
 #### GameMessage类的实现
 
-+ GameMessage的属性pxProtoBufMsg用来存消息内容对象：protobuf生成的SyncPid，Position和BroadCast等类都是google::protobuf::Message的子类。
++ 属性pxProtoBufMsg用来存消息内容对象：protobuf生成的SyncPid，Position和BroadCast等类都是google::protobuf::Message的子类。
++ 构造函数内，需要根据消息ID不同，创建不同的google::protobuf::Message的子类对象（SyncPid，Position和BroadCast等）
++ 成员函数ParseBuff2Msg
