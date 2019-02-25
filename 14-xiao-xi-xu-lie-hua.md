@@ -39,7 +39,6 @@ struct Student{
 Student s = {1,"abc"};
 ```
 
-通过protobuf将s编码（encode）后的数据的二进制展示为：
-`0C 00 00 00 01 00 00 00 12 0A E6 BF AE E9 98 B3 20 E7 BF BC
-`
+通过protobuf将s编码（encode）后的数据的二进制展示和解释为：
+`08 01 12 03 61 62 63`
 
