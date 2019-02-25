@@ -298,16 +298,19 @@ bool GameProtocol::response2raw(const Response * pstResp, RawData * pstData)
 
     if (NULL != pxMsg)
     {
+        /*获取消息内容序列化后的长度*/
+        int iMsgContenLen = pxMsg->GetSerialLength();
         /*创建临时缓冲区存放消息内容序列化后的数据*/
-        unsigned char aucBuffer[2048] = {0};
+        unsigned char *pucBuffer = (unsigned char *)calloc(1UL, iMsgContenLen + 8);
         /*从第8个字节开始存放消息内容序列化的数据*/
-        int iMsgContenLen = pxMsg->SerialMsg2Buff(aucBuffer + 8, sizeof(aucBuffer) - 8);
+        pxMsg->SerialMsg2Buff(pucBuffer + 8, iMsgContenLen);
         /*将长度设置到最开始的字段*/
-        SetLittleEndNumber(iMsgContenLen, aucBuffer);
+        SetLittleEndNumber(iMsgContenLen, pucBuffer);
         /*将类型ID设置到第4个位置*/
-        SetLittleEndNumber(pxMsg->Id, aucBuffer + 4);
-        /*将临时空间内的数据设置到输出参数中*/
-        bRet = pstData->SetData(aucBuffer, iMsgContenLen + 8);
+        SetLittleEndNumber(pxMsg->Id, pucBuffer + 4);
+        /*将临时空间内的数据设置到输出参数中后释放临时缓冲区*/
+        bRet = pstData->SetData(pucBuffer, iMsgContenLen + 8);
+        free(pucBuffer);
     }
 
     return bRet;
