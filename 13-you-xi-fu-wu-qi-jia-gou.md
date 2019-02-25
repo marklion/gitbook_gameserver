@@ -405,18 +405,20 @@ bool GameMessage::ParseBuff2Msg(const unsigned char * pucDataBuff, int iLength)
     return bRet;
 }
 
-int GameMessage::SerialMsg2Buff(unsigned char * pucDataBuff, int iBufLength)
+bool GameMessage::SerialMsg2Buff(unsigned char * pucDataBuff, int iBufLength)
 {
-    int iRet = 0;
-
     /*写死，产生的消息内容为0x11 0x22*/
     pucDataBuff[0] = 0x11;
     pucDataBuff[1] = 0x22;
-    iRet = 2;
 
     cout<<"SerialMsg2Buff is called"<<endl;
 
-    return iRet;
+    return true;
+}
+
+int GameMessage::GetSerialLength()
+{
+    return 2;
 }
 ```
 
