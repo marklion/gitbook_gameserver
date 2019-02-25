@@ -88,10 +88,13 @@ public:
     GameMessage(int _id);
     /*析构时，要释放pxProtoBufMsg*/
     virtual ~GameMessage();
-    
+
     /*新增两个成员函数，用于数据和请求直接的转换*/
     bool ParseBuff2Msg(const unsigned char *pucDataBuff, int iLength);
-    int SerialMsg2Buff(unsigned char *pucDataBuff, int iBufLength);
+    bool SerialMsg2Buff(unsigned char *pucDataBuff, int iBufLength);
+
+    /*获取整个消息序列化后的缓冲区长度*/
+    int GetSerialLength();
 };
 
 #endif
