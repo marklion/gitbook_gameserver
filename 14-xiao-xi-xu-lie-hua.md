@@ -125,8 +125,17 @@ message Student {
 命令protoc可以基于我们编写的proto文件生成各种语言的原文件。在这里我们生成c++文件。
 
 ```bash
-
+# 参数1 指定我们要生成的c++文件放到哪里
+# 参数2 指定proto文件
+$ protoc --cpp_out=./ test.proto
+# 执行成功后会生成两个文件
+# test.pb.h文件中定义了pb_sample::Student类
+# test.pb.cc中实现了pb_sample::Student类中数据序列化和解析的函数
+$ ls
+test.pb.cc  test.pb.h  test.proto
 ```
+
+
 
 **小结：**
 
