@@ -133,8 +133,8 @@ $ ls
 test.pb.cc  test.pb.h  test.proto
 ```
 
-* test.pb.h文件中定义了pb_sample::Student类
-* test.pb.cc中实现了pb_sample::Student类中数据序列化和解析的函数
+* test.pb.h文件中定义了pb\_sample::Student类
+* test.pb.cc中实现了pb\_sample::Student类中数据序列化和解析的函数
 
 #### 第四步 编译并测试
 
@@ -153,13 +153,13 @@ int main()
 {
     /*创建消息对象s*/
     pb_sample::Student s;
-    
+
     /*调用set函数设置消息内容*/
     s.set_no(1);
     s.set_name("abc");
 
     string out;
-    
+
     /*将s序列化成字节流，并打印出来*/
     s.SerializeToString(&out);
 
@@ -189,7 +189,7 @@ $ pkg-config --libs  protobuf
 -lprotobuf -pthread
 ```
 
-编译测试文件(main.cpp)和消息类文件(test.pb.cc)并测试
+编译测试文件\(main.cpp\)和消息类文件\(test.pb.cc\)并测试
 
 ```bash
 $ g++ -std=c++11 -pthread main.cpp test.pb.cc -lprotobuf
@@ -212,9 +212,9 @@ using namespace std;
 int main()
 {
     char aucBuff[] = {0x08, 0x01, 0x12, 0x03, 0x61, 0x62, 0x63};
-    
+
     /*TODO: 将aucBuff内的数据解析成对象并打印内容*/    
-        
+
     return 0;
 }
 ```
@@ -240,6 +240,8 @@ int main()
 
 每个类型的消息详细定义如下（客户端已经定义好了）：
 
+msg.proto
+
 ```protobuf
 syntax="proto3";
 package pb;
@@ -247,54 +249,75 @@ package pb;
 option csharp_namespace="Pb";
 
 message SyncPid{
-	int32 Pid=1;
-	string Username=2;
+    int32 Pid=1;
+    string Username=2;
 }
 
 message Player{
-	int32 Pid=1;
-	Position P=2;
-	string Username=3;
+    int32 Pid=1;
+    Position P=2;
+    string Username=3;
 }
 
 message SyncPlayers{
         /*嵌套多个子消息类型Player的消息*/
-	repeated Player ps=1;
+    repeated Player ps=1;
 }
 
 message Position{
-	float X=1;
-	float Y=2;
-	float Z=3;
-	float V=4;
-	int32 BloodValue=5;
+    float X=1;
+    float Y=2;
+    float Z=3;
+    float V=4;
+    int32 BloodValue=5;
 }
 
 message MovePackege{
-	Position P=1;
-	int32 ActionData=2;
+    Position P=1;
+    int32 ActionData=2;
 }
 
 message BroadCast{
-	int32 Pid=1;
-	int32 Tp=2;
-	/*根据Tp不同，BroadCast消息会包含：
-	聊天内容（Content）或初始位置(P)或新位置P*/
-	oneof Data {
+    int32 Pid=1;
+    int32 Tp=2;
+    /*根据Tp不同，BroadCast消息会包含：
+    聊天内容（Content）或初始位置(P)或新位置P*/
+    oneof Data {
             string Content=3;
             Position P=4;
             /*ActionData暂时预留*/
-	    int32 ActionData=5;
+        int32 ActionData=5;
         }
-	string Username=6;
+    string Username=6;
 }
 
 
 message Talk{
-	string Content=1;
+    string Content=1;
 }
 ```
 
+将msg.proto文件放到game目录下，基于该文件生成c++源文件，为了适配我们的Makefile，将其文件名后缀改成cpp
 
+```bash
+$ protoc --cpp_out=./ msg.proto
+$ ls
+game             
+GameChannel.h    
+GameMessage.h     
+GameProtocol.h  
+GameRole.h  
+Makefile   
+msg.pb.h
+GameChannel.cpp  
+GameMessage.cpp  
+GameProtocol.cpp  
+GameRole.cpp    
+main.cpp    
+msg.pb.cc  
+msg.proto
+```
 
+#### GameMessage类的实现
 
++ GameMessage的属性pxProtoBufMsg用来存消息内容对象：protobuf生成的SyncPid，Position和BroadCast等类都是google::protobuf::Message的子类。
