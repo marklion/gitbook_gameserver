@@ -47,7 +47,29 @@ Student s = {1,"abc"};
 
 **使用方式：**
 
-protobuf是不限语言的
+protobuf是不限语言的，所以我们需要将消息结构定义成protobuf规定格式的配置文件中，进而用protobuf生成目标语言的代码。
+
+#### 第一步，安装protobuf
+
+参考项目仓库的README，执行安装：https://github.com/protocolbuffers/protobuf/blob/master/src/README.md
+
+```bash
+# 安装依赖
+$ sudo apt-get install autoconf automake libtool curl make g++ unzip
+
+```
+
+访问https://github.com/protocolbuffers/protobuf/releases/latest下载某个发布版本`protobuf-cpp-[VERSION].tar.gz`
+
+```bash
+$ ./configure
+$ make
+$ make check
+$ sudo make install
+$ sudo ldconfig # refresh shared library cache.
+```
+
+可以敲出protoc命令则意味着安装成功
 
 **小结：** 
 
@@ -55,4 +77,5 @@ protobuf是不限语言的
 2. protobuf使用了Varint技术，使得小的数字不会占用无用空间。详细：https://developers.google.com/protocol-buffers/docs/encoding
 3. 只要遵守protobuf推荐的消息定义方式，protobuf可以保证消息处理的向前兼容。
 
+## 1.4.2 
 
