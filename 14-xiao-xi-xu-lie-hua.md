@@ -45,4 +45,14 @@ Student s = {1,"abc"};
 + 08 01表示s.No,08大概代表整数类型，01是数的值
 + 12 03 61 62 63表示s.Name,12大概代表字符串类型，03代表字符串长度，61 62 63代表"abc"
 
+**使用方式：**
+
+protobuf是不限语言的
+
+**小结：** 
+
+1. protobuf序列化后的数据时不可阅读流，是保证健壮的情况下占用空间最小的形式（相比xml json）。
+2. protobuf使用了Varint技术，使得小的数字不会占用无用空间。详细：https://developers.google.com/protocol-buffers/docs/encoding
+3. 只要遵守protobuf推荐的消息定义方式，protobuf可以保证消息处理的向前兼容。
+
 
