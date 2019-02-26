@@ -427,6 +427,7 @@ void GameMessage::PrintDebugInfo()
     cout<<"msg struct:"<<endl;
     if (NULL != pxProtoBufMsg)
     {
+        /*该函数可以将protobuf的消息对象转换成易读的字符串*/
         cout<<pxProtoBufMsg->Utf8DebugString()<<endl;
     }
     else
