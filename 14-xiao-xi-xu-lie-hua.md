@@ -341,6 +341,7 @@ using namespace std;
 /*根据ID不同，创建不同的ProtobufMsg对象*/
 GameMessage::GameMessage(int _id):IdMessage(_id)
 {
+    /*下列宏均需要在GameMessage.h中定义*/
     switch (_id)
     {
         case GAME_MSG_ID_LOGON_SYNCPID:
@@ -452,6 +453,7 @@ GameRole.cpp
 using namespace std;
 
 class IdProcTalkMsg:public IIdMsgProc{
+    /*处理消息*/
     virtual bool ProcMsg(IdMsgRole * _pxRole, IdMessage * _pxMsg)
     {
         cout<<"IdProcTalkMsg.ProcMsg is called"<<endl;
