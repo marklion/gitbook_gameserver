@@ -441,6 +441,7 @@ void GameMessage::PrintDebugInfo()
 #### 测试
 
 **测试用例：** 打开客户端并连接到服务器上，发送一条聊天消息。服务器收到后回传一个字符串"OK"。
+
 **打桩：** 在GameRole类中注册处理消息ID为2的消息处理接口，实现回传"OK"的功能
 
 GameRole.cpp
