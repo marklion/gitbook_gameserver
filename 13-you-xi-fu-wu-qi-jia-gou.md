@@ -352,12 +352,12 @@ GameChannel::GameChannel():TcpListenChannel(8899)
 bool GameChannel::TcpAfterConnection(int _iDataFd, struct sockaddr_in * pstClientAddr)
 {
     GameRole *role = new GameRole();
-    /*将新创建的GameRole对象添加到server方便管理*/
-    Server::GetServer()->add_role("GameRole", role);
     /*创建框架自带的tcp数据处理对象*/
     TcpDataChannel *pxTcpData = new TcpDataChannel(_iDataFd, new GameProtocol(role));
     /*将tcp数据处理对象添加为myRole对象的出口通道*/
     role->SetChannel(pxTcpData);
+    /*将新创建的GameRole对象添加到server方便管理*/
+    Server::GetServer()->add_role("GameRole", role);
     //将TcpDataChannel对象添加到server实例中
     return Server::GetServer()->install_channel(pxTcpData);
 }
