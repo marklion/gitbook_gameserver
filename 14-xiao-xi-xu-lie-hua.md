@@ -473,4 +473,30 @@ class IdProcTalkMsg:public IIdMsgProc{
 
 + 指定服务器地址和端口号运行客户端：`test.exe 127.0.0.1 8899`
 + 输入任意内容并点击发送
+
+![](/assets/测试消息收发.png)
+
 + 查看调试信息
+
+```bash
+++++++++++++++++++++++++++++++
+new tcp connection, fd = 5
+++++++++++++++++++++++++++++++
+GameRole object is added to server
+<----------------------------------------->
+recv from 5:05 00 00 00 02 00 00 00 0A 03 61 62 63
+<----------------------------------------->
+#接收的数据成功转换成ID为2的消息，内容正确
+msg ID:2
+msg struct:
+Content: "abc"
+
+IdProcTalkMsg.ProcMsg is called
+msg ID:2
+msg struct:
+Content: "OK"
+#发送的消息成功转换成数据
+<----------------------------------------->
+send to 5:04 00 00 00 02 00 00 00 0A 02 4F 4B
+<----------------------------------------->
+```
