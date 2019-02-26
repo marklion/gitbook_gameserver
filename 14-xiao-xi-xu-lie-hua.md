@@ -331,4 +331,103 @@ msg.proto
 + 在成员函数SerialMsg2Buff内直接调用pxProtoBufMsg对象的序列化方法
 + 在成员函数GetSerialLength内直接调用pxProtoBufMsg对象的获取长度方法
 
+```cpp
+#include "GameMessage.h"
+#include "msg.pb.h"
+#include <iostream>
 
+using namespace std;
+
+/*根据ID不同，创建不同的ProtobufMsg对象*/
+GameMessage::GameMessage(int _id):IdMessage(_id)
+{
+    switch (_id)
+    {
+        case GAME_MSG_ID_LOGON_SYNCPID:
+            pxProtoBufMsg = new pb::SyncPid();
+            break;
+        case GAME_MSG_ID_TALK_CONTENT:
+            pxProtoBufMsg = new pb::Talk();
+            break;
+        case GAME_MSG_ID_NEW_POSITION:
+            pxProtoBufMsg = new pb::Position();
+            break;
+        case GAME_MSG_ID_BROADCAST:
+            pxProtoBufMsg = new pb::BroadCast();
+            break;
+        case GAME_MSG_ID_LOGOFF_SYNCPID:
+            pxProtoBufMsg = new pb::SyncPid();
+            break;
+        case GAME_MSG_ID_SURROUND_POSITION:
+            pxProtoBufMsg = new pb::SyncPlayers();
+            break;
+        default:
+            pxProtoBufMsg = NULL;
+            break;
+    }
+}
+
+/*析构时，要释放pxProtoBufMsg*/
+GameMessage::~GameMessage()
+{
+    if (NULL != pxProtoBufMsg)
+    {
+        delete pxProtoBufMsg;
+        pxProtoBufMsg = NULL;
+    }
+}
+
+bool GameMessage::ParseBuff2Msg(const unsigned char * pucDataBuff, int iLength)
+{
+    bool bRet = false;
+
+    if (NULL != pxProtoBufMsg)
+    {
+        bRet = pxProtoBufMsg->ParseFromArray(pucDataBuff, iLength);
+    }
+
+    PrintDebugInfo();
+
+    return bRet;
+}
+
+bool GameMessage::SerialMsg2Buff(unsigned char * pucDataBuff, int iBufLength)
+{
+    bool bRet = false;
+
+    PrintDebugInfo();
+
+    if (NULL != pxProtoBufMsg)
+    {
+        bRet = pxProtoBufMsg->SerializeToArray(pucDataBuff, iBufLength);
+    }
+
+    return bRet;
+}
+
+int GameMessage::GetSerialLength()
+{
+    int iRet = 0;
+
+    if (NULL != pxProtoBufMsg)
+    {
+        return pxProtoBufMsg->ByteSizeLong();
+    }
+
+    return iRet;
+}
+
+void GameMessage::PrintDebugInfo()
+{
+    cout<<"msg ID:"<<Id<<endl;
+    cout<<"msg struct:"<<endl;
+    if (NULL != pxProtoBufMsg)
+    {
+        cout<<pxProtoBufMsg->Utf8DebugString()<<endl;
+    }
+    else
+    {
+        cout<<"(Not a protobuf msg)"<<endl;
+    }
+}
+```
