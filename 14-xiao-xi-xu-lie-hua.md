@@ -438,3 +438,49 @@ void GameMessage::PrintDebugInfo()
 ```
 
 #### 测试
+
+**测试用例：** 打开客户端并连接到服务器上，发送一条聊天消息。服务器收到后回传一个字符串"OK"。
+**打桩：** 在GameRole类中注册处理消息ID为2的消息处理接口，实现回传"OK"的功能
+
+GameRole.cpp
+
+```cpp
+#include "GameRole.h"
+#include <iostream>
+#include "GameMessage.h"
+
+using namespace std;
+
+class IdProcTalkMsg:public IIdMsgProc{
+    virtual bool ProcMsg(IdMsgRole * _pxRole, IdMessage * _pxMsg)
+    {
+        cout<<"IdProcTalkMsg.ProcMsg is called"<<endl;
+        GameMessage *pxMsg = new GameMessage(GAME_MSG_ID_TALK_CONTENT);
+        pb::Talk *pxTalkMsg = dynamic_cast<pb::Talk *>(pxMsg->pxProtoBufMsg);
+        pxTalkMsg->set_content("OK");
+        Response stResp;
+        stResp.pxMsg = pxMsg;
+        stResp.pxSender = _pxRole;
+        
+        Server::GetServer()->send_resp(&stResp);
+
+        return true;
+    }
+};
+
+bool GameRole::init()
+{
+    bool bRet = false;
+
+    cout<<"GameRole object is added to server"<<endl;
+    bRet = register_id_func(GAME_MSG_ID_TALK_CONTENT, new IdProcTalkMsg());    
+
+    return bRet;
+}
+
+void GameRole::fini()
+{
+    cout<<"GameRole object is deled from server"<<endl;
+}
+```
+
