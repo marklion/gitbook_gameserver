@@ -383,9 +383,11 @@ bool GameMessage::ParseBuff2Msg(const unsigned char * pucDataBuff, int iLength)
 
     if (NULL != pxProtoBufMsg)
     {
+        /*调用成员对象的解析函数*/
         bRet = pxProtoBufMsg->ParseFromArray(pucDataBuff, iLength);
     }
 
+    /*打印当前消息内容*/
     PrintDebugInfo();
 
     return bRet;
@@ -395,10 +397,12 @@ bool GameMessage::SerialMsg2Buff(unsigned char * pucDataBuff, int iBufLength)
 {
     bool bRet = false;
 
+    /*打印当前消息内容*/
     PrintDebugInfo();
 
     if (NULL != pxProtoBufMsg)
     {
+        /*调用成员对象的序列化函数*/
         bRet = pxProtoBufMsg->SerializeToArray(pucDataBuff, iBufLength);
     }
 
