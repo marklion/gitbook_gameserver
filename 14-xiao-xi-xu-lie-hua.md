@@ -469,3 +469,8 @@ class IdProcTalkMsg:public IIdMsgProc{
 };
 ```
 
+**测试执行**：
+
++ 指定服务器地址和端口号运行客户端：`test.exe 127.0.0.1 8899`
++ 输入任意内容并点击发送
++ 查看调试信息
