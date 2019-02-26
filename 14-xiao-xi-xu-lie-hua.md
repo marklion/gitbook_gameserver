@@ -453,15 +453,19 @@ GameRole.cpp
 using namespace std;
 
 class IdProcTalkMsg:public IIdMsgProc{
-    /*处理消息*/
+    /*处理ID为2的消息的函数*/
     virtual bool ProcMsg(IdMsgRole * _pxRole, IdMessage * _pxMsg)
     {
         cout<<"IdProcTalkMsg.ProcMsg is called"<<endl;
+        /*构造空的待发送消息，指定ID为2*/
         GameMessage *pxMsg = new GameMessage(GAME_MSG_ID_TALK_CONTENT);
+        /*将成员pxProtoBufMsg动态强转成Talk类型*/
         pb::Talk *pxTalkMsg = dynamic_cast<pb::Talk *>(pxMsg->pxProtoBufMsg);
+        /*设置回传内容是OK*/
         pxTalkMsg->set_content("OK");
         Response stResp;
         stResp.pxMsg = pxMsg;
+        /*发送给消息来源*/
         stResp.pxSender = _pxRole;
         
         Server::GetServer()->send_resp(&stResp);
