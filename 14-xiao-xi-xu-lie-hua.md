@@ -446,12 +446,6 @@ void GameMessage::PrintDebugInfo()
 GameRole.cpp
 
 ```cpp
-#include "GameRole.h"
-#include <iostream>
-#include "GameMessage.h"
-
-using namespace std;
-
 class IdProcTalkMsg:public IIdMsgProc{
     /*处理ID为2的消息的函数*/
     virtual bool ProcMsg(IdMsgRole * _pxRole, IdMessage * _pxMsg)
@@ -473,20 +467,5 @@ class IdProcTalkMsg:public IIdMsgProc{
         return true;
     }
 };
-
-bool GameRole::init()
-{
-    bool bRet = false;
-
-    cout<<"GameRole object is added to server"<<endl;
-    bRet = register_id_func(GAME_MSG_ID_TALK_CONTENT, new IdProcTalkMsg());    
-
-    return bRet;
-}
-
-void GameRole::fini()
-{
-    cout<<"GameRole object is deled from server"<<endl;
-}
 ```
 
