@@ -229,28 +229,43 @@ int main()
     cout<<"25 surround:"<<endl;
     for (auto itr = Grids.begin(); itr != Grids.end(); itr++)
     {
-        cout<<(*itr)->GridNo<<endl;
+        cout<<(*itr)->GridNo<<" ";
     }
+    cout<<endl;
     Grids.clear();
-    
     /*获取33号格子周围的格子*/
     pxWorld->GetSurroundGrids(33, Grids);
     cout<<"33 surround:"<<endl;
     for (auto itr = Grids.begin(); itr != Grids.end(); itr++)
     {
-        cout<<(*itr)->GridNo<<endl;
+        cout<<(*itr)->GridNo<<" ";
     }
+    cout<<endl;
     Grids.clear();
-    
     /*获取17号格子周围的格子*/
     pxWorld->GetSurroundGrids(17, Grids);
     cout<<"17 surround:"<<endl;
     for (auto itr = Grids.begin(); itr != Grids.end(); itr++)
     {
-        cout<<(*itr)->GridNo<<endl;
+        cout<<(*itr)->GridNo<<" ";
     }
+    cout<<endl;
     Grids.clear();
     
     return 0;
 }
+```
+
+测试OK：
+
+```bash
+Player1：7
+Player2：14
+Player3：16
+25 surround:
+25 18 19 20 24 26 30 31 32
+33 surround:
+33 26 27 28 32 34
+17 surround:
+17 10 11 16 22 23
 ```
