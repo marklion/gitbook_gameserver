@@ -97,4 +97,112 @@ public:
 };
 ```
 
+成员函数实现：
+
+```cpp
+
+Grid::Grid(int _GridNo):GridNo(_GridNo)
+{
+}
+
+/*直接调用list添加对象*/
+void Grid::add(GameRole * _pxPlayer)
+{
+    players.push_back(_pxPlayer);
+}
+
+/*直接调用list删除对象*/
+void Grid::remove(GameRole * _pxPlayer)
+{
+    players.remove(_pxPlayer);
+}
+
+/*构造游戏世界，通过参数指定边界和分隔方式*/
+World::World(int _minX, int _maxX, int _minY, int _maxY, int _Xcnt, int _Ycnt):
+    MinX(_minX), MaxX(_maxX), MinY(_minY), MaxY(_maxY), Xcnt(_Xcnt), Ycnt(_Ycnt)
+{
+    /*创建所有格子对象并按顺序添加到vector容器中*/
+    for (int i = 0; i < Xcnt * Ycnt; i++)
+    {
+        m_Grids.push_back(new Grid(i));
+    }
+}
+
+World::~World()
+{
+    /*析构时应该删掉所有格子对象*/
+    auto itr = m_Grids.begin();
+    while (itr != m_Grids.end())
+    {
+        delete (*itr);
+        itr = m_Grids.erase(itr);
+    }
+}
+
+int World::Xwidth()
+{
+    return (MaxX - MinX) / Xcnt;
+}
+
+int World::Ywidth()
+{
+    return (MaxY - MinY) / Ycnt;
+}
+
+int World::GetGridNo(int _x, int _y)
+{
+    /*网格编号=(x-x轴起始坐标)/x轴网格宽度 + (y-y轴起始坐标)/y轴宽度*x轴网格数量*/
+    return (_x - MinX) / Xwidth() + (_y - MinY) / Ywidth() * Xcnt;
+}
+
+Grid *World::GetGrid(int _x, int _y)
+{
+    return m_Grids[GetGridNo(_x, _y)];
+}
+
+/*获取周围格子，获取到的对象会存到第二个参数指定的list中*/
+void World::GetSurroundGrids(int GridNo, list < Grid * > &Grids)
+{
+    /*先记录自己*/
+    Grids.push_back(m_Grids[GridNo]);
+
+    /*计算当前格子横着数和竖着数分别是几*/
+    int Xno = GridNo % Xcnt;
+    int Yno = GridNo / Xcnt;
+
+    /*从九宫格的左上开始依次判断每个格子是否是周围格子，若是则记录*/
+    if (Xno > 0 && Yno > 0)
+    {
+        Grids.push_back(m_Grids[GridNo-1-Xcnt]);        
+    }
+    if (Yno > 0)
+    {
+        Grids.push_back(m_Grids[GridNo-Xcnt]);
+    }
+    if ((Xno < Xcnt - 1) && (Yno > 0))
+    {
+        Grids.push_back(m_Grids[GridNo+1-Xcnt]);
+    }
+    if (Xno > 0)
+    {
+        Grids.push_back(m_Grids[GridNo-1]);
+    }
+    if (Xno < Xcnt - 1)
+    {
+        Grids.push_back(m_Grids[GridNo+1]);
+    }
+    if ((Xno > 0) && (Yno < Ycnt - 1))
+    {
+        Grids.push_back(m_Grids[GridNo-1+Xcnt]);
+    }
+    if (Yno < Ycnt - 1)
+    {
+        Grids.push_back(m_Grids[GridNo+Xcnt]);
+    }
+    if ((Xno < Xcnt - 1) && (Yno < Ycnt - 1))
+    {
+        Grids.push_back(m_Grids[GridNo+1+Xcnt]);
+    }
+}
+```
 
