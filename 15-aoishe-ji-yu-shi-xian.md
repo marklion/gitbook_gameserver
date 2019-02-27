@@ -52,6 +52,38 @@
   + 网格表示：封装一个vector存放所有的网格对象，网格序号按照vector存储序号表示
   + 主要函数：根据坐标获取网格，根据网格号获取周围网格
 
+World类和Grid类声明
 
+```cpp
+
+/*网格类*/
+class Grid{
+public:
+    Grid(int _GridNo);
+    int GridNo = 0;
+    std::list<GameRole *> players;
+    void add(GameRole *_pxPlayer);
+    void remove(GameRole *_pxPlayer);
+};
+
+class World{
+private:
+    std::vector<Grid *> m_Grids;
+    int MinX = 0;
+    int MaxX = 0;
+    int MinY = 0;
+    int MaxY = 0;
+    int Xcnt = 0;
+    int Ycnt = 0;
+    int Xwidth();
+    int Ywidth();
+public:
+    World(int _minX, int _maxX, int _minY, int _maxY, int _Xcnt, int _Ycnt);
+    ~World();
+    int GetGridNo(int _x, int _y);
+    Grid *GetGrid(int _x, int _y);
+    void GetSurroundGrids(int GridNo, std::list<Grid *> &Grids);
+};
+```
 
 
