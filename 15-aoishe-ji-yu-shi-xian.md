@@ -206,3 +206,51 @@ void World::GetSurroundGrids(int GridNo, list < Grid * > &Grids)
 }
 ```
 
+**测试：**
+
+参照1.5.1的例子，获取三个玩家坐标对应的格子编号；分别获取25,33和17号格子的周围格子。
+
+```cpp
+using namespace std;
+
+int main()
+{
+    /*按照上例特征创建游戏世界对象*/
+    World *pxWorld = new World(20,200,50,230,6,6);
+    
+    /*分别获取三个玩家所属的格子号*/
+    cout<<"Player1："<<pxWorld->GetGridNo(60, 107)<<endl;
+    cout<<"Player2："<<pxWorld->GetGridNo(91, 118)<<endl;
+    cout<<"Player3："<<pxWorld->GetGridNo(147, 133)<<endl;
+
+    /*获取25号格子周围的格子*/
+    list < Grid * > Grids;
+    pxWorld->GetSurroundGrids(25, Grids);
+    cout<<"25 surround:"<<endl;
+    for (auto itr = Grids.begin(); itr != Grids.end(); itr++)
+    {
+        cout<<(*itr)->GridNo<<endl;
+    }
+    Grids.clear();
+    
+    /*获取33号格子周围的格子*/
+    pxWorld->GetSurroundGrids(33, Grids);
+    cout<<"33 surround:"<<endl;
+    for (auto itr = Grids.begin(); itr != Grids.end(); itr++)
+    {
+        cout<<(*itr)->GridNo<<endl;
+    }
+    Grids.clear();
+    
+    /*获取17号格子周围的格子*/
+    pxWorld->GetSurroundGrids(17, Grids);
+    cout<<"17 surround:"<<endl;
+    for (auto itr = Grids.begin(); itr != Grids.end(); itr++)
+    {
+        cout<<(*itr)->GridNo<<endl;
+    }
+    Grids.clear();
+    
+    return 0;
+}
+```
