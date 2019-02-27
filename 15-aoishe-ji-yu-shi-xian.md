@@ -59,29 +59,40 @@ World类和Grid类声明
 /*网格类*/
 class Grid{
 public:
+    /*构造时指定网格编号*/
     Grid(int _GridNo);
     int GridNo = 0;
+    
+    /*list类型的成员变量用于记录当前格子内的所有玩家*/
     std::list<GameRole *> players;
+    /*提供添加和删除函数*/
     void add(GameRole *_pxPlayer);
     void remove(GameRole *_pxPlayer);
 };
 
+/*游戏世界类*/
 class World{
 private:
+    /*vector类型成员变量用来存储当前所有的格子对象*/
     std::vector<Grid *> m_Grids;
+    /*记录游戏世界的重要参数*/
     int MinX = 0;
     int MaxX = 0;
     int MinY = 0;
     int MaxY = 0;
     int Xcnt = 0;
     int Ycnt = 0;
+    /*获取格子X和Y方向的宽度函数*/
     int Xwidth();
     int Ywidth();
 public:
+    /*构造世界对象时要指定关键参数*/
     World(int _minX, int _maxX, int _minY, int _maxY, int _Xcnt, int _Ycnt);
     ~World();
+    /*根据玩家坐标获取所在格子号或格子对象*/
     int GetGridNo(int _x, int _y);
     Grid *GetGrid(int _x, int _y);
+    /*获取所有周围格子对象（包括自己）*/
     void GetSurroundGrids(int GridNo, std::list<Grid *> &Grids);
 };
 ```
