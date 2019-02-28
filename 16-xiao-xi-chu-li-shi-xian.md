@@ -311,6 +311,7 @@ void GameRole::ViewLost(Grid * pxGrid)
         Server::GetServer()->send_resp(&stResp);
     }
 }
+/*玩家移动消息处理对象*/
 class IdProcMoveMsg:public IIdMsgProc{
     virtual bool ProcMsg(IdMsgRole * _pxRole, IdMessage * _pxMsg)
     {
@@ -321,6 +322,7 @@ class IdProcMoveMsg:public IIdMsgProc{
         pb::Position *pxNewPos = dynamic_cast<pb::Position *>(pxMoveMsg->pxProtoBufMsg);
         if (NULL != pxNewPos)
         {
+            /*取出消息中携带的坐标，调用update函数*/
             pxCurPlayer->Update(pxNewPos->x(), pxNewPos->y(), pxNewPos->z(), pxNewPos->v());
             bRet = true;
         }
@@ -334,7 +336,8 @@ bool GameRole::init()
     bool bRet = false;
 
     cout<<"GameRole object is added to server"<<endl;
-    bRet = register_id_func(GAME_MSG_ID_TALK_CONTENT, new IdProcTalkMsg());    
+    
+     /*注册消息处理对象*/ 
     bRet |= register_id_func(GAME_MSG_ID_NEW_POSITION, new IdProcMoveMsg());
 
     if (true == bRet)
