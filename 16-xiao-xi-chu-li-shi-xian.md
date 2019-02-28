@@ -98,9 +98,50 @@ GameMessage *GameRole::MakeBroadCastNewPosition()
 | --- | --- | --- |
 | 201 | 玩家ID和玩家姓名 | SyncPid |
 
+```cpp
+GameMessage *GameRole::MakeLogoffSyncIdMsg()
+{
+    /*与第一个消息的唯一区别就是消息ID不同*/
+    GameMessage *pxMsg = new GameMessage(GAME_MSG_ID_LOGOFF_SYNCPID);
+    pb::SyncPid *pxSyncPidMsg = dynamic_cast<pb::SyncPid *>(pxMsg->pxProtoBufMsg);
+
+    pxSyncPidMsg->set_pid(iPid);
+    pxSyncPidMsg->set_username(szName);
+
+    return pxMsg;
+}
+```
+
 | 消息ID | 消息内容 | 消息类名 |
 | --- | --- | --- |
 | 202 | 周围玩家们的位置 | SyncPlayers |
+
+```cpp
+/*上线后周围玩家的位置消息，参数是周围玩家list*/
+GameMessage *GameRole::MakeSurroudPosition(list < GameRole * > & players)
+{
+    GameMessage *pxMsg = new GameMessage(GAME_MSG_ID_SURROUND_POSITION);
+    pb::SyncPlayers *pxSyncPlayersMsg = dynamic_cast<pb::SyncPlayers *>(pxMsg->pxProtoBufMsg);
+
+    /*遍历玩家list，将每个玩家的信息都填入消息对象*/
+    for (auto itr = players.begin(); itr != players.end(); itr++)
+    {
+        GameRole *pxPlayer = *itr;
+        /*多个嵌套消息时，用add_XXX函数创建一个子消息对象并关联到父消息中*/
+        pb::Player *pxSubPlayerMsg = pxSyncPlayersMsg->add_ps();
+        /*将每个玩家的相关信息填入子消息对象*/
+        pxSubPlayerMsg->set_pid(pxPlayer->iPid);
+        pxSubPlayerMsg->set_username(pxPlayer->szName);
+        pb::Position *pxSubPlayerPos = pxSubPlayerMsg->mutable_p();
+        pxSubPlayerPos->set_x((int)(pxPlayer->x));
+        pxSubPlayerPos->set_y((int)(pxPlayer->y));
+        pxSubPlayerPos->set_z((int)(pxPlayer->z));
+        pxSubPlayerPos->set_v((int)(pxPlayer->v));
+    }
+
+    return pxMsg;
+}
+```
 
 + 新客户端连接后，向其发送ID和名称
   - GameRole的构造函数中，需要对ID和名称进行赋值，使用全局变量递增，保证ID唯一
