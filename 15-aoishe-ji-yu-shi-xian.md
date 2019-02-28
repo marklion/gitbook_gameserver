@@ -273,5 +273,44 @@ Player3：16
 回到最初的问题：怎样表示周围玩家？
 
 + 实现World单例，代表所有玩家都在且只在一个游戏世界玩耍
-+ 在GameRole类的init和fini方法分别
++ 在GameRole类的init和fini函数中分别将玩家添加到World和移除出World。
++ 定义函数GetSurroundPlayers用于获取周围所有玩家
+
+```cpp
+/*用全局变量简易实现单例，坐标来自客户端约定*/
+static World g_xGameWorld = World(85, 410, 75, 400, 10, 20);
+
+bool GameRole::init()
+{
+    cout<<"GameRole object is added to server"<<endl;
+    /*根据坐标取出对应格子，然后添加自己到格子里*/
+    g_xGameWorld.GetGrid(x, z)->add(this);
+        
+    return true;
+}
+
+void GameRole::fini()
+{
+    cout<<"GameRole object is deled from server"<<endl;
+    
+    g_xGameWorld.GetGrid(x, z)->remove(this);
+}
+
+/*获取周围玩家，用list存储*/
+void GameRole::GetSurroundPlayers(list < GameRole * > & Players)
+{
+    list<Grid *> SurroundGrid;
+
+    int GridNo = g_xGameWorld.GetGridNo(x, z);
+    /*根据坐标获取周围格子*/
+    g_xGameWorld.GetSurroundGrids(GridNo, SurroundGrid);
+
+    for (auto itr = SurroundGrid.begin(); itr != SurroundGrid.end(); itr++)
+    {
+        /*将每个格子里的所有玩家都追加的输出参数中*/
+        list<GameRole *> tmpList = list<GameRole *>((*itr)->players);
+        Players.splice(Players.begin(), tmpList);        
+    }
+}
+```
 
