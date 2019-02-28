@@ -188,6 +188,29 @@ void GameRole::SyncSelfPostion()
 }
 ```
 
++ 客户端断开后向周围玩家发送下线消息（在fini函数调用）
+
+```cpp
+/*客户端断开后执行*/
+void GameRole::fini()
+{
+    cout<<"GameRole object is deled from server"<<endl;
+    list < GameRole * > Players;
+    GetSurroundPlayers(Players);
+
+    /*构造下线消息并向周围玩家发送*/
+    Response stResp;
+    stResp.pxMsg = MakeLogoffSyncIdMsg();
+    for (auto itr = Players.begin(); itr != Players.end(); itr++)
+    {
+        stResp.pxSender = *itr;
+        Server::GetServer()->send_resp(&stResp);
+    }
+
+    g_xGameWorld.GetGrid(x, z)->remove(this);
+}
+```
+
 + 收到客户端的移动消息后（注册IdProcMoveMsg，调用update函数）
   - 处理玩家切换网格后的视野变化（定义函数OnExchangeAioGrid）
   - 向周围玩家发送新位置（在函数update中调用）
@@ -351,6 +374,8 @@ bool GameRole::init()
     return bRet;
 }
 ```
+
+
 
 * 新客户端连接后，向其发送ID和名称
   * GameRole的构造函数中，需要对ID和名称进行赋值，使用全局变量递增，保证ID唯一
