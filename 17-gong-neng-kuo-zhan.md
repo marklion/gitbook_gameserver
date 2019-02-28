@@ -28,3 +28,126 @@ GameRole::GameRole()
 }
 ```
 
+**测试**：多个玩家登陆后位置随机
+
+## 1.7.2 随机昵称
+
+**设计：** 在文件中存储一定量的常用姓和名，GameRole创建时随机组合姓名
+
++ 设计数据结构存储随机姓名池，进程启动时构造
+
+![](/assets/名字结构.png)
+
++ 生成随机名称：取第随机个姓，取第随机个名
+
+![](/assets/生成名字.png)
+
++ GameRole断开前，要把姓名释放回姓名池
+
+**编码：**
+
+实现随机数生成池
+
+```cpp
+void RandomName::LoadFile()
+{
+    ifstream fFirstName;
+    ifstream fSecondName;
+    string tmpFirst;
+    string tmpSecond;
+
+    fFirstName.open(RANDOM_FIRST_NAME);
+    fSecondName.open(RANDOM_SECOND_NAME);
+
+    if (fFirstName.is_open() && fSecondName.is_open())
+    {
+        while (getline(fFirstName, tmpFirst))
+        {
+            FirstName *pstFirst = new FirstName();
+            pstFirst->szFirstName = tmpFirst;
+            m_names.push_back(pstFirst);
+            while (getline(fSecondName, tmpSecond))
+            {
+                pstFirst->vecLastName.push_back(tmpSecond);
+            }
+            fSecondName.clear(ios::goodbit);
+            fSecondName.seekg(ios::beg);
+        }
+
+        fFirstName.close();
+        fSecondName.close();
+    }
+}
+
+string RandomName::GetName()
+{
+    string szRet;
+
+    if (0 < m_names.size())
+    {
+        int iRandFirst = PlayerRole::e() % m_names.size();
+        FirstName *pstFirst = m_names[iRandFirst];
+        int iRandSecond = PlayerRole::e() % pstFirst->vecLastName.size();
+        
+        szRet = pstFirst->szFirstName + " " + pstFirst->vecLastName[iRandSecond];
+
+        pstFirst->vecLastName.erase(pstFirst->vecLastName.begin() + iRandSecond);
+        if (0 >= pstFirst->vecLastName.size())
+        {
+            m_names.erase(m_names.begin() + iRandFirst);
+            delete pstFirst;
+        }
+    }
+    else
+    {
+        szRet = "Not Support";
+    }
+
+    return szRet;
+}
+
+void RandomName::ReleaseName(std :: string szName)
+{
+    int iSpace = szName.find(" ");
+    string szFirstName = szName.substr(0, iSpace);
+    string szSecondName = szName.substr(iSpace + 1, szName.size());
+
+    auto itr = m_names.begin();
+    for (; itr != m_names.end(); itr++)
+    {
+        if ((*itr)->szFirstName == szFirstName)
+        {
+            break;
+        }
+    }
+
+    FirstName *pstFirst = NULL;
+    if (m_names.end() != itr)
+    {
+        pstFirst = (*itr);
+    }
+    else
+    {
+        pstFirst = new FirstName();
+        pstFirst->szFirstName = szFirstName;
+        m_names.push_back(pstFirst);
+    }
+    pstFirst->vecLastName.push_back(szSecondName);
+}
+RandomName::RandomName()
+{
+}
+
+RandomName::~RandomName()
+{
+    auto itr = m_names.begin();
+    while (itr != m_names.end())
+    {
+        auto pData = (*itr);
+        delete pData;
+        itr = m_names.erase(itr);
+    }
+}
+```
+
+
