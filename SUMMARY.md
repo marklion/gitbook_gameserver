@@ -8,5 +8,5 @@
   * [1.4 消息序列化](14-xiao-xi-xu-lie-hua.md)
   * [1.5 AOI设计与实现](15-aoishe-ji-yu-shi-xian.md)
   * [1.6 消息处理实现](16-xiao-xi-chu-li-shi-xian.md)
-* [1.7 功能扩展](17-gong-neng-kuo-zhan.md)
+  * [1.7 功能扩展](17-gong-neng-kuo-zhan.md)
 
