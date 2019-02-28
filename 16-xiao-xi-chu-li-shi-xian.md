@@ -149,12 +149,17 @@ GameMessage *GameRole::MakeSurroudPosition(list < GameRole * > & players)
 * 消息内容
 * 发送对象
 
-结合需求，可以看出，服务器发送消息的时机有：
+服务器发送消息的时机包括：
 
-+ 客户端连接后（在init函数中调用）
-  - 回传ID和名称（定义函数SendSelfIDName实现）
-  - 回传周围玩家位置，向周围玩家发送新玩家位置（定义函数SyncSelfPostion实现）
-  
+#### 客户端连接后（在init函数中调用）
+
+**需求和设计**：
+
+- 回传ID和名称（定义函数SendSelfIDName实现）
+- 回传周围玩家位置，向周围玩家发送新玩家位置（定义函数SyncSelfPostion实现）
+
+**编码实现**：
+
 ```cpp
 void GameRole::SendSelfIDName()
 {
@@ -188,7 +193,15 @@ void GameRole::SyncSelfPostion()
 }
 ```
 
-+ 客户端断开后向周围玩家发送下线消息（在fini函数调用）
+**测试：**多个客户端连接后能够彼此看到
+
+#### 客户端断开后（在fini函数调用）
+
+**需求和设计**：
+
++ 向周围玩家发送下线消息
+
+**编码实现**：
 
 ```cpp
 /*客户端断开后执行*/
@@ -211,9 +224,15 @@ void GameRole::fini()
 }
 ```
 
-+ 收到客户端的移动消息后（注册IdProcMoveMsg，调用update函数）
+**测试：** 下线后从别的玩家视野里消失
+
+#### 收到客户端的移动消息后（注册IdProcMoveMsg，调用update函数）
+
+**需求和设计**
   - 处理玩家切换网格后的视野变化（定义函数OnExchangeAioGrid）
   - 向周围玩家发送新位置（在函数update中调用）
+
+**编码实现**：
 
 ```cpp
 /*Update函数用于处理玩家位置更新，参数是新位置*/
@@ -375,8 +394,15 @@ bool GameRole::init()
 }
 ```
 
-+ 收到聊天信息后，发送给所有玩家（注册IdProcTalkMsg
-对象处理）
+**测试：** 多个玩家可以看到彼此的移动
+
+#### 收到聊天信息后（注册IdProcTalkMsg对象处理）
+
+**需求和设计：**
+
++ 发送给所有玩家
+
+**编码**
 
 ```cpp
 class IdProcTalkMsg:public IIdMsgProc{
@@ -429,5 +455,10 @@ bool GameRole::init()
 }
 ```
 
+**测试**： 玩家之间可以世界聊天
 
+**小结**：
+
++ 面向对象的局部还是面向过程
++ 面向过程设计的核心：拆分过程 
 
