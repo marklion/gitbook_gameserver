@@ -49,6 +49,25 @@ GameRole::GameRole()
 实现随机数生成池
 
 ```cpp
+#define RANDOM_FIRST_NAME "random_first.txt"
+#define RANDOM_SECOND_NAME "random_last.txt"
+/*定义数据结构*/
+struct FirstName {
+    std::string szFirstName;
+    std::vector<std::string> vecLastName;
+};
+
+class RandomName{
+public:
+    RandomName();
+    ~RandomName();
+    void LoadFile();
+    std::string GetName();
+    void ReleaseName(std::string szName);
+private:
+    std::vector<FirstName *> m_names;
+};
+
 void RandomName::LoadFile()
 {
     ifstream fFirstName;
@@ -85,9 +104,9 @@ string RandomName::GetName()
 
     if (0 < m_names.size())
     {
-        int iRandFirst = PlayerRole::e() % m_names.size();
+        int iRandFirst = g_Random_engine() % m_names.size();
         FirstName *pstFirst = m_names[iRandFirst];
-        int iRandSecond = PlayerRole::e() % pstFirst->vecLastName.size();
+        int iRandSecond = g_Random_engine() % pstFirst->vecLastName.size();
         
         szRet = pstFirst->szFirstName + " " + pstFirst->vecLastName[iRandSecond];
 
