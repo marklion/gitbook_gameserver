@@ -2,17 +2,17 @@
 
 当前游戏已经可用，我们接下来尝试扩展几个功能：
 
-+ 出生点随机
-+ 玩家昵称随机
-+ 守护进程和进程监控
-+ 日志管理
+* 出生点随机
+* 玩家昵称随机
+* 守护进程和进程监控
+* 日志管理
 
 ## 1.7.1 出生点随机
 
-**设计**： GameRole对象创建时，随机生成合理范围内的坐标。生成随机数的方法: std::default_random_engine(详细资料：http://www.cplusplus.com/reference/random/default_random_engine/)
+**设计**： GameRole对象创建时，随机生成合理范围内的坐标。生成随机数的方法: std::default\_random\_engine\(详细资料：[http://www.cplusplus.com/reference/random/default\_random\_engine/](http://www.cplusplus.com/reference/random/default_random_engine/)\)
 
-+ 构造函数参数用于指定种子（一般使用当前时间）
-+ ()操作符返回随机数（无符号整形）
+* 构造函数参数用于指定种子（一般使用当前时间）
+* \(\)操作符返回随机数（无符号整形）
 
 **编码**：修改GameRole.cpp文件
 
@@ -36,15 +36,15 @@ GameRole::GameRole()
 
 **设计：** 在文件中存储一定量的常用姓和名，GameRole创建时随机组合姓名
 
-+ 设计数据结构存储随机姓名池，进程启动时构造
+* 设计数据结构存储随机姓名池，进程启动时构造
 
 ![](/assets/名字结构.png)
 
-+ 生成随机名称：取第随机个姓，取第随机个名
+* 生成随机名称：取第随机个姓，取第随机个名
 
 ![](/assets/生成名字.png)
 
-+ GameRole释放前，要把姓名释放回姓名池
+* GameRole释放前，要把姓名释放回姓名池
 
 **编码：**
 
@@ -109,7 +109,7 @@ string RandomName::GetName()
         int iRandFirst = g_Random_engine() % m_names.size();
         FirstName *pstFirst = m_names[iRandFirst];
         int iRandSecond = g_Random_engine() % pstFirst->vecLastName.size();
-        
+
         szRet = pstFirst->szFirstName + " " + pstFirst->vecLastName[iRandSecond];
 
         pstFirst->vecLastName.erase(pstFirst->vecLastName.begin() + iRandSecond);
@@ -200,7 +200,7 @@ int main()
     pxServer->init();
     pxServer->install_channel(new GameChannel());
     pxServer->run();
-    
+
     return 0;
 }
 ```
@@ -208,6 +208,9 @@ int main()
 ## 1.7.3 守护进程和进程监控
 
 **设计：**
-+ 判断启动参数，若为daemon则按照守护进程启动
-+ 启动守护进程时，创建子进程用于游戏业务；父进程用于接收子进程退出状态并重启子进程。
+
+* 判断启动参数，若为daemon则按照守护进程启动
+* 启动守护进程时，创建子进程用于游戏业务；父进程用于接收子进程退出状态并重启子进程。
+
+
 
