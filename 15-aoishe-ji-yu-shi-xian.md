@@ -314,3 +314,4 @@ void GameRole::GetSurroundPlayers(list < GameRole * > & Players)
 }
 ```
 
+**小结：** 本章通过网格AOI算法解决了获取周围玩家的问题。

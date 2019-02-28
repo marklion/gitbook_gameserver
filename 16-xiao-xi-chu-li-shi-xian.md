@@ -12,7 +12,7 @@
 
 * 发送时机
 * **消息内容**
-* 发送对象：AOI实现
+* 发送对象
 
 结合需求和之前的消息类型表格，定义函数用于生成待发送的消息
 
@@ -141,6 +141,52 @@ GameMessage *GameRole::MakeSurroudPosition(list < GameRole * > & players)
 
     return pxMsg;
 }
+```
+
+## 1.6.2 流程完善
+
+* **发送时机**
+* 消息内容
+* 发送对象
+
+结合需求，可以看出，服务器发送消息的时机有：
+
++ 客户端连接后（在init函数中调用）
+  - 回传ID和名称（定义函数SendSelfIDName实现）
+  - 回传周围玩家位置，向周围玩家发送新玩家位置（定义函数SyncSelfPostion实现）
+  
+```cpp
+void GameRole::SendSelfIDName()
+{
+    Response stResp;
+    stResp.pxSender = this;
+    stResp.pxMsg = MakeLogonSyncIdMsg();
+
+    Server::GetServer()->send_resp(&stResp);
+}
+
+void GameRole::SyncSelfPostion()
+{
+    list < GameRole * > Players;
+
+    GetSurroundPlayers(Players);
+    
+    /*回传周围玩家位置*/
+    Response stResp;
+    stResp.pxSender = this;
+    stResp.pxMsg = MakeSurroudPosition(Players);
+    Server::GetServer()->send_resp(&stResp);
+
+    /*遍历周围玩家，发送新玩家位置*/
+    Response stResp2Players;
+    stResp2Players.pxMsg = MakeBroadCastLogonPosition();
+    for (auto itr = Players.begin(); itr != Players.end(); itr++)
+    {
+        stResp2Players.pxSender = *itr;
+        Server::GetServer()->send_resp(&stResp2Players);
+    }
+}
+
 ```
 
 * 新客户端连接后，向其发送ID和名称
