@@ -155,12 +155,25 @@ GameMessage *GameRole::MakeSurroudPosition(list < GameRole * > & players)
 
 **需求和设计**：
 
+- 构造对象时初始化名称和坐标。
 - 回传ID和名称（定义函数SendSelfIDName实现）
 - 回传周围玩家位置，向周围玩家发送新玩家位置（定义函数SyncSelfPostion实现）
 
 **编码实现**：
 
 ```cpp
+static int g_GamePlayerId = 0;
+
+GameRole::GameRole()
+{
+    /*通过全局变量递增保证唯一ID*/
+    iPid = g_GamePlayerId++;
+    /*名称和坐标写死*/
+    szName = "abc";
+    x = 160;
+    z = 134;
+}
+
 void GameRole::SendSelfIDName()
 {
     Response stResp;
