@@ -190,5 +190,18 @@ GameRole::~GameRole()
     g_xRandModule.ReleaseName(szName);
 }
 
+int main()
+{
+    Server *pxServer = Server::GetServer();
+    /*载入文件内容*/
+    g_xRandModule.LoadFile();
+    pxServer->init();
+    pxServer->install_channel(new GameChannel());
+    pxServer->run();
+    
+    return 0;
+}
+
+
 ```
 
