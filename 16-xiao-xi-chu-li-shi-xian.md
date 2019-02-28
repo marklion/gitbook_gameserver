@@ -37,6 +37,63 @@ GameMessage *GameRole::MakeLogonSyncIdMsg()
 | --- | --- | --- |
 | 200 | 玩家ID，聊天内容/初始位置/动作（预留）/新位置 | BroadCast |
 
+```cpp
+/*广播聊天消息，参数是消息内容*/
+GameMessage *GameRole::MakeBroadCastTalkContent(string szContent)
+{
+    GameMessage *pxMsg = new GameMessage(GAME_MSG_ID_BROADCAST);
+    pb::BroadCast *pxBCTalk = dynamic_cast<pb::BroadCast *>(pxMsg->pxProtoBufMsg);
+
+    pxBCTalk->set_pid(iPid);
+    pxBCTalk->set_username(szName);
+    /*设定tp=1代表这是一个聊天信息*/
+    pxBCTalk->set_tp(1);
+    pxBCTalk->set_content(szContent);
+
+    return pxMsg;
+}
+
+/*广播玩家登陆后所处位置*/
+GameMessage *GameRole::MakeBroadCastLogonPosition()
+{
+    GameMessage *pxMsg = new GameMessage(GAME_MSG_ID_BROADCAST);
+    pb::BroadCast *pxBCLogonPos = dynamic_cast<pb::BroadCast *>(pxMsg->pxProtoBufMsg);
+
+    pxBCLogonPos->set_pid(iPid);
+    pxBCLogonPos->set_username(szName);
+    /*设定tp=2代表这是玩家位置消息*/
+    pxBCLogonPos->set_tp(2);
+    /*位置数据是通过消息嵌套表示，mutable代表创建嵌套对象并关联到父消息中*/
+    pb::Position *pxSubPos = pxBCLogonPos->mutable_p();
+    /*向子消息中逐个填入坐标*/
+    pxSubPos->set_x((int)x);
+    pxSubPos->set_y((int)y);
+    pxSubPos->set_z((int)z);
+    pxSubPos->set_v((int)v);
+
+    return pxMsg;
+}
+
+/*广播玩家移动后的新位置消息*/
+GameMessage *GameRole::MakeBroadCastNewPosition()
+{
+    GameMessage *pxMsg = new GameMessage(GAME_MSG_ID_BROADCAST);
+    pb::BroadCast *pxBCNewPos = dynamic_cast<pb::BroadCast *>(pxMsg->pxProtoBufMsg);
+
+    pxBCNewPos->set_pid(iPid);
+    pxBCNewPos->set_username(szName);
+    /*设定tp=4代表这是玩家新位置消息*/
+    pxBCNewPos->set_tp(4);
+    pb::Position *pxSubPos = pxBCNewPos->mutable_p();
+    pxSubPos->set_x((int)x);
+    pxSubPos->set_y((int)y);
+    pxSubPos->set_z((int)z);
+    pxSubPos->set_v((int)v);
+
+    return pxMsg;
+}
+```
+
 | 消息ID | 消息内容 | 消息类名 |
 | --- | --- | --- |
 | 201 | 玩家ID和玩家姓名 | SyncPid |
