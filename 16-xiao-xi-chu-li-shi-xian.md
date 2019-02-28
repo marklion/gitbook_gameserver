@@ -375,7 +375,59 @@ bool GameRole::init()
 }
 ```
 
++ 收到聊天信息后，发送给所有玩家（注册IdProcTalkMsg
+对象处理）
 
+```cpp
+class IdProcTalkMsg:public IIdMsgProc{
+    virtual bool ProcMsg(IdMsgRole * _pxRole, IdMessage * _pxMsg)
+    {
+        bool bRet = false;
+        
+        GameRole *pxCurPlayer = dynamic_cast<GameRole *>(_pxRole);
+        GameMessage *pxRecvMsg = dynamic_cast<GameMessage *>(_pxMsg);
+        pb::Talk *pxTalkContent = dynamic_cast<pb::Talk *>(pxRecvMsg->pxProtoBufMsg);
+
+        if (NULL != pxTalkContent)
+        {
+            /*取出聊天内容并构造成聊天消息*/
+            Response stResp;
+            stResp.pxMsg = pxCurPlayer->MakeBroadCastTalkContent(pxTalkContent->content());
+            
+            /*取出所有玩家对象，遍历并发送聊天信息*/
+            auto RoleList = Server::GetServer()->GetRoleListByCharacter("GameRole");
+            for (auto itr = RoleList->begin(); itr != RoleList->end(); itr++)
+            {
+                stResp.pxSender = *itr;
+                Server::GetServer()->send_resp(&stResp);
+            }
+            
+            bRet = true;
+        }
+
+        return bRet;
+    }
+};
+bool GameRole::init()
+{
+    bool bRet = false;
+
+    cout<<"GameRole object is added to server"<<endl;
+    /*注册聊天消息处理对象*/
+    bRet = register_id_func(GAME_MSG_ID_TALK_CONTENT, new IdProcTalkMsg());   
+    bRet |= register_id_func(GAME_MSG_ID_NEW_POSITION, new IdProcMoveMsg());
+
+    if (true == bRet)
+    {
+        g_xGameWorld.GetGrid(x, z)->add(this);
+        
+        SendSelfIDName();
+        SyncSelfPostion();
+    }
+    
+    return bRet;
+}
+```
 
 * 新客户端连接后，向其发送ID和名称
   * GameRole的构造函数中，需要对ID和名称进行赋值，使用全局变量递增，保证ID唯一
