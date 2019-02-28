@@ -42,7 +42,7 @@ GameRole::GameRole()
 
 ![](/assets/生成名字.png)
 
-+ GameRole断开前，要把姓名释放回姓名池
++ GameRole释放前，要把姓名释放回姓名池
 
 **编码：**
 
@@ -169,4 +169,26 @@ RandomName::~RandomName()
 }
 ```
 
+调用姓名池
+
+```cpp
+/*创建全局变量存储姓名池*/
+RandomName g_xRandModule;
+
+GameRole::GameRole()
+{
+    iPid = g_GamePlayerId++;
+    /*获取随机姓名*/
+    szName = g_xRandModule.GetName();
+    x = 160 + g_Random_engine() % 20;
+    z = 134 + g_Random_engine() % 20;
+}
+
+GameRole::~GameRole()
+{
+    /*释放回姓名池*/
+    g_xRandModule.ReleaseName(szName);
+}
+
+```
 
