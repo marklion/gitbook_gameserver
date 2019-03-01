@@ -48,9 +48,10 @@ GameRole::GameRole()
 
 **编码：**
 
-实现随机数生成池
+实现随机姓名生成池
 
 ```cpp
+/*两个文件中分别存储常用姓和常用名*/
 #define RANDOM_FIRST_NAME "random_first.txt"
 #define RANDOM_SECOND_NAME "random_last.txt"
 /*定义数据结构*/
@@ -205,12 +206,133 @@ int main()
 }
 ```
 
+**测试**： 玩家登陆后获取到了不同的昵称
+
 ## 1.7.3 守护进程和进程监控
 
 **设计：**
 
 * 判断启动参数，若为daemon则按照守护进程启动
 * 启动守护进程时，创建子进程用于游戏业务；父进程用于接收子进程退出状态并重启子进程。
+
+**编码**：
+
+```cpp
+#include <zinx/zinx.h>
+#include "GameChannel.h"
+#include "GameRole.h"
+
+extern RandomName g_xRandModule;
+using namespace std;
+
+/*定义启动守护进程函数*/
+void daemon_init(void) {
+    /*创建子进程后父进程退出*/
+    pid_t pid = fork()  ; 
+    if(pid < 0)
+        exit(1); 
+    else if(pid > 0)
+        exit(0);
+
+    /*设定回话ID和标准输入输出错误的文件重定向*/
+    setsid();
+    int fd = open("/dev/null", O_RDWR);
+    dup2(fd, 0);
+    dup2(fd, 1);
+    dup2(fd, 2);
+    close(fd);
+
+    /*之前创建的子进程作为父进程一直循环检查子子进程状态*/
+    while (true)
+    {
+        pid_t iPid = fork();
+        int status = 1;
+        /*创建子进程后父进程仅仅是wait*/
+        if (iPid > 0)
+        {
+            wait(&status);
+        }
+        else if (iPid < 0)
+        {
+            exit(1);
+        }
+        /*子进程退出循环进入后续业务*/
+        else
+        {
+            break;
+        }
+    }
+}
+
+int main(int argc, char **argv)
+{
+    if (argc >= 2)
+    {
+        /*如果参数是daemon则按照守护进程运行*/
+        if (0 == strcmp(argv[1], "daemon"))
+        {
+            daemon_init();
+        }
+    }
+    else
+    {
+        std::cout<<"Usage:"<<argv[0]<<" <daemon | debug>"<<std::endl;
+        return 0;
+    }
+    Server *pxServer = Server::GetServer();
+    g_xRandModule.LoadFile();
+    pxServer->init();
+    pxServer->install_channel(new GameChannel());
+    pxServer->run();
+    
+    return 0;
+}
+```
+
+**测试**： 执行运行的命令行后，出现两个守护进程，PID较大的是处理游戏业务的，较小的是循环拉起子进程的。
+
+## 1.7.4 日志管理
+
+在进程变成守护进程后，运行的日志看不到了。添加日志功能，让开发人员能够查询到之前的运行日志。
+
+**设计：** 
+
+* 当进程运行成守护进程模式时，判断是否有log参数，若有，则存储运行日志
+* 调用zinx框架提供的日志管理函数，将标准输出和标准错误存到文件中
+
+**编码：**
+
+```cpp
+
+int main(int argc, char **argv)
+{
+    if (argc >= 2)
+    {
+        if (0 == strcmp(argv[1], "daemon"))
+        {
+            daemon_init();
+            if ((argc == 3) && (0 == strcmp(argv[2], "log")))
+            {
+                /*启动参数有log时，设置标准输出和标准错误的输出文件*/
+                LOG_SetStdOut("game_std_out.txt");
+                LOG_SetStdErr("game_std_err.txt");
+            }
+        }
+    }
+    else
+    {
+        std::cout<<"Usage:"<<argv[0]<<" <daemon [log] | debug>"<<std::endl;
+        return 0;
+    }
+    Server *pxServer = Server::GetServer();
+    g_xRandModule.LoadFile();
+    pxServer->init();
+    pxServer->install_channel(new GameChannel());
+    pxServer->run();
+    
+    return 0;
+}
+```
 
 
 
