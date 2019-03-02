@@ -85,5 +85,54 @@ void TcpDataChannel::TcpProcHup()
     m_fd = -1;
 }
 ```
+ ## 2.4.2 ID类消息处理类
+ 
+ 一般地，待处理的消息都会按数字或标志位进行分类，为方便开发者对消息类型区分处理，设计IdMsgRole类用于处理用数字作为ID的消息。
+ 
++ 提供注册和去注册函数用于指定消息类型对应的处理函数
++ 使用map存储注册的处理函数对象
++ 使用该role进行ID类消息处理时，本质上就是从map中取出对应的处理函数再进行处理 
 
+```cpp
+bool IdMsgRole::register_id_func(int _id, IIdMsgProc *Iproc)
+{
+    m_IdMsgMap[_id] = Iproc;
+
+    return true;
+}
+
+void IdMsgRole::unregister_id_func(int _id)
+{
+    m_IdMsgMap.erase(_id);
+}
+
+bool IdMsgRole::proc_msg(Amessage * pxMsg)
+{
+    bool bRet = false;
+    IdMessage *pxIdMsg = dynamic_cast<IdMessage *>(pxMsg);
+
+    if (NULL != pxIdMsg)
+    {
+        IIdMsgProc *pxIproc = m_IdMsgMap[pxIdMsg->Id];
+        if (NULL != pxIproc)
+        {
+            bRet = pxIproc->ProcMsg(this, pxIdMsg);
+        }
+    }
+
+    return bRet;
+}
+
+IdMsgRole::~IdMsgRole()
+{
+    auto itr = m_IdMsgMap.begin();
+    while (itr != m_IdMsgMap.end())
+    {
+        int Id = (*itr).first;
+        auto pxIdproc = (*itr++).second;
+        unregister_id_func(Id);
+        delete pxIdproc;
+    }
+}
+```
 
