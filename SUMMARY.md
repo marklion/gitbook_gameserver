@@ -12,4 +12,5 @@
   * [1.8 总结](18-zong-jie.md)
 * [2 zinx框架实现](2-zinxkuang-jia-shi-xian.md)
   * [2.1 框架设计](21-kuang-jia-she-ji.md)
+  * [2.2 并发实现](22-bing-fa-shi-xian.md)
 

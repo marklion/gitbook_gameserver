@@ -58,7 +58,19 @@ UDP输入数据，输出到FIFO文件
 基于之前设计的类模型，我们可以设计server类来实现这三种并发模型。
 
 + 多进程/多线程：
+
   - install每个Channel对象时，为其绑定一个进程或线程
-  - 进程或线程内阻塞读取数据，读取到数据后顺序执行protocol对象的解析，role对象的处理等操作
-  - 
+  - uninstall某个Channel对象时，server要回收其线程或进程资源
+  - 进程或线程内循环执行阻塞读取数据，读取到数据后顺序执行protocol对象的解析，role对象的处理等操作
+
++ 非阻塞轮询
+
+  - Channel对象install到server时要修改成员fd的属性为非阻塞
+  - server对象维护Channel对象容器，循环调用每个Channel对象的读取函数，若读到数据则执行后续操作
+
++ IO多路复用
+
+  - install和uninstall本质上就是将Channel对象的fd从epoll实例中添加或摘除。
+  - server对象维护一个epoll实例和Channel对象容器。
+  - 某个fd有数据后，调用对应的处理流程。
 
