@@ -16,4 +16,5 @@
   * [2.3 资源管理](23-zi-yuan-guan-li.md)
   * [2.4 实用类](24-shi-yong-lei.md)
   * [2.5 构建方法](25-gou-jian-fang-fa.md)
+  * [2.6 总结](26-zong-jie.md)
 

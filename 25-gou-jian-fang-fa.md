@@ -25,3 +25,5 @@ $ make
 $ sudo cp libzinx.so /usr/lib/
 $ sudo cp include/* /usr/include/zinx/
 ```
+
+安装成功后，开发者只需在写代码是包含zinx/zinx.h头文件，编译代码时指定-lzinx，就可以使用框架了。
