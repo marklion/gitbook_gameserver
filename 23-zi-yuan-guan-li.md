@@ -108,3 +108,25 @@ void Server::fini()
     close(m_epollfd);
 }
 ```
+
+## 2.3.2 server类实例化
+
+server类是zinx框架所有功能对外使用的窗口，整个应用程序应该有且只有一个server对象（单例），并在应用程序启动是创建对象。
+
+```cpp
+class Server{
+public:
+    static Server *GetServer()
+    {
+        if (NULL == Server::pxServer)
+        {
+            Server::pxServer = new Server();
+        }
+
+        return Server::pxServer;
+    }
+private:
+    static Server *pxServer;
+    Server();
+};
+```
