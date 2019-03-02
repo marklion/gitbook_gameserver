@@ -46,7 +46,7 @@ void Server::fini()
 }
 ```
 
-## 2.2.1 添加和摘除fd
+## 2.2.2 添加和摘除fd
 
 设计成员函数install和uninstall用于实现从epoll实例中添加和摘除fd。
 
@@ -86,3 +86,7 @@ void Server::uninstall_channel(Achannel * pxChannel)
 }
 ```
 
+## 2.2.3 并发处理流程
+
+确定并发模型为epoll和其对应的数据结构后，其处理流程是固定的：
+epoll_wait----->遍历ready的fd----->取出channel对象---->调用channel对象的readFd函数得到数据----->调用channel对象绑定的protocol对象进行数据处理得到request对象----->调用request对象的成员对象role的proc_msg函数对request的msg对象进行处理。
