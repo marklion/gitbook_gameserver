@@ -94,6 +94,14 @@ void TcpDataChannel::TcpProcHup()
 + 使用该role进行ID类消息处理时，本质上就是从map中取出对应的处理函数再进行处理 
 
 ```cpp
+class IIdMsgProc{
+public:
+    virtual bool ProcMsg(IdMsgRole *_pxRole, IdMessage *_pxMsg) = 0;
+    virtual ~IIdMsgProc()
+    {
+    }
+};
+
 bool IdMsgRole::register_id_func(int _id, IIdMsgProc *Iproc)
 {
     m_IdMsgMap[_id] = Iproc;
@@ -113,6 +121,7 @@ bool IdMsgRole::proc_msg(Amessage * pxMsg)
 
     if (NULL != pxIdMsg)
     {
+        /*取出ID类消息处理对象，进行对应的处理*/
         IIdMsgProc *pxIproc = m_IdMsgMap[pxIdMsg->Id];
         if (NULL != pxIproc)
         {
