@@ -70,7 +70,7 @@ UDP输入数据，输出到FIFO文件
 
 + IO多路复用
 
-  - install和uninstall本质上就是将Channel对象的fd从epoll实例中添加或摘除。
   - server对象维护一个epoll实例和Channel对象容器。
+  - install和uninstall本质上就是将Channel对象的fd从epoll实例中添加或摘除。
   - 某个fd有数据后，调用对应的处理流程。
 
