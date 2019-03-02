@@ -89,4 +89,117 @@ void Server::uninstall_channel(Achannel * pxChannel)
 ## 2.2.3 并发处理流程
 
 确定并发模型为epoll和其对应的数据结构后，其处理流程是固定的：
-epoll_wait----->遍历ready的fd----->取出channel对象---->调用channel对象的readFd函数得到数据----->调用channel对象绑定的protocol对象进行数据处理得到request对象----->调用request对象的成员对象role的proc_msg函数对request的msg对象进行处理。
+
+#### 处理并行输入
+
+1. epoll_wait
+2. 遍历ready的fd
+3. 取出channel对象
+4. 调用channel对象的readFd函数得到数据
+5. 调用channel对象绑定的protocol对象进行数据处理得到request对象
+6. 调用request对象的成员对象role的proc_msg函数对request的msg对象进行处理。
+
+![](/assets/主循环时序.png)
+
+```cpp
+bool Server::run()
+{
+    int iEpollRet = -1;
+
+    if (0 > m_epollfd)
+    {
+        return false;
+    }
+
+    /*主循环*/
+    while (true != m_need_exit)
+    {
+        /*设定一次epoll_wait最多处理100个并发数据*/
+        struct epoll_event atmpEvent[100];
+        iEpollRet = epoll_wait(m_epollfd, atmpEvent, 100, -1);
+        if (-1 == iEpollRet)
+        {
+            /*若epoll_wait被信号打断，则忽略失败，继续epoll_wait*/
+            if (EINTR == errno)
+            {
+                continue;
+            }
+            else
+            {
+                break;
+            }
+        }
+        /*遍历本次的并发数据*/
+        for (int i = 0; i < iEpollRet; i++)
+        {
+            Request *pstReq;
+            RawData stRD;
+            /*取出channel对象*/
+            Achannel *pxchannel = static_cast<Achannel *>(atmpEvent[i].data.ptr);
+            
+            /*调用channel对象的readFd函数，本次epoll事件类型作为输入参数，读取到的数据stRD作为输出参数*/
+            if (true == pxchannel->readFd(atmpEvent[i].events, &stRD))
+            {
+                Aprotocol *pxProtocol = pxchannel->GetProtocol();
+                list<Request *> ReqList;
+                /*调用protocol对象的数据处理函数，得到若干request对象*/
+                if ((NULL != pxProtocol) && (true == pxProtocol->raw2request(&stRD, ReqList)))
+                {
+                    auto itr = ReqList.begin();
+                    /*遍历处理所有request对象*/
+                    while (itr != ReqList.end())
+                    {
+                        pstReq = (*itr);
+                        (void)handle(pstReq);
+                        ReqList.erase(itr++);
+                        delete pstReq;
+                    }
+                }
+            }
+            /*如果读取数据不成功，则认为fd异常，要摘除并释放channel对象*/
+            else
+            {
+                uninstall_channel(pxchannel);
+                delete pxchannel;
+                /*这里要及时break，后续的并发数据由下次epoll_wait重新处理*/
+                break;
+            }
+        }
+    }
+
+    return true;
+}
+
+/*处理request对象*/
+bool Server::handle(Request * pstReq)
+{
+    /*调用role对象的proc_msg函数处理message对象*/
+    return pstReq->pxProcessor->proc_msg(pstReq->pxMsg);
+}
+```
+
+#### 输出数据
+
+![](/assets/发送数据时序图.png)
+
+```cpp
+bool Server::send_resp(Response * pstResp)
+{
+    bool bRet = false;
+
+    if ((NULL != pstResp) && (NULL != pstResp->pxMsg) && (NULL != pstResp->pxSender))
+    {
+        Achannel *pxDestChannel = pstResp->pxSender->GetChannel();
+        if (NULL != pxDestChannel)
+        {
+            RawData stRD;
+            if (true == pxDestChannel->GetProtocol()->response2raw(pstResp, &stRD))
+            {
+                bRet = pxDestChannel->writeFd(&stRD);
+            }
+        }
+    }
+
+    return bRet;
+}
+```
