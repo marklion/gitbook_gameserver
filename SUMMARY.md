@@ -17,4 +17,5 @@
   * [2.4 实用类](24-shi-yong-lei.md)
   * [2.5 构建方法](25-gou-jian-fang-fa.md)
   * [2.6 总结](26-zong-jie.md)
+* [3 多实例部署](3-duo-shi-li-bu-shu.md)
 
