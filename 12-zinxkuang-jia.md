@@ -10,7 +10,7 @@ github路径：[https://github.com/marklion/Game\_zinx](https://github.com/markl
 
    > 一般地，项目的github主页上会列出README文档。
    
-2. 搭建开发环境
+2. 搭建开发环境，安装vscode进行编码，调试
 3. 运行文档中的案例并做一定扩展
 
 **小结：** zinx框架用于实现通用的IO事物处理。在zinx框架下实现功能时，应该将功能分解成四个部分（IO，协议，消息，角色）后分别由四个类（AChannel, Aprotocol, Amessage, Arole）的派生类实现。
