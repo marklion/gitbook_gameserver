@@ -291,5 +291,69 @@ RUN apt-get install -y gcc
 ENTRYPOINT ["gcc"]
 ```
 
+编译镜像，执行gcc
+
+```bash
+$ docker build -t my_gcc .
+# 由于dockerfile中定义了执行点是gcc，所以，镜像名后所有内容都是gcc的参数
+$ docker run -v /home/dev/:/root/host/ my_gcc /root/host/tcp_echo.c -o /root/host/tcp_echo 
+```
+
+##### 常见指令
+
+|指令|描述|
+|-|-|
+|FROM *本地镜像名或dockerhub镜像名*|指定基础镜像|
+|WORKDIR *容器内绝对路径*|指定后续容器内命令的执行路径|
+|RUN *命令*|构建镜像过程中执行的命令，多条可以顺序书写|
+|COPY *主机文件路径* *容器内路径*|将主机文件拷贝到容器内，主机文件必须使用dockerfile所在路径的相对路径|
+|EXPOSE *端口号*|定义要映射到主机的端口号，搭配run命令的-P参数可以随机映射|
+|ENTRYPOINT *["程序"]*或*脚本*|定义镜像执行点，定义后，run命令的最后字段会变成该命令的参数|
+|CMD *["命令或参数"]*|若没有定义执行点，则该命令定义的是镜像创建后缺省的指向程序。若定义了执行点，则该命令定义的是执行点的参数。run命令的最后字段会替换该命令的值|
+
+### 2.3.6 将游戏服务器放到容器中运行
+
+**需求拆解：** 在容器中运行游戏服务器总共分三步：
+
+1. 为游戏服务器创建环境可用的镜像
+2. 把游戏服务器作为容器执行点并开放端口映射
+3. 以守护进程模式运行镜像
+
+**问题1**：环境可用？我们的游戏服务器有哪些依赖？怎么解决
+
+**解决方案：** 
+
++ 基于纯净ubuntu安装zinx库，安装protobuf，安装cmake
++ 静态编译游戏服务器（推荐）
+
+**问题2**：端口映射到哪个宿主机端口？映射端口时，宿主机端口会不会被占用？
+
+**解决方案：** run容器时使用-P配合dockerfile里的EXPOSE随机分配端口。
+
+##### 步骤1 静态编译游戏服务器
+
++ 修改zinx框架的Makefile，构建静态zinx库：libzinx.a
+
+```Makefile
+libzinx.a:./channel/*.cpp ./message/*.cpp ./role/*.cpp ./protocol/*.cpp ./*.cpp
+        g++ -c -std=c++11 -fPIC  $^ -I ./include
+        ar -rc $@ *.o
+```
+
++ 修改游戏服务器的Makefile，使用静态编译
+  - -static关键字表示静态编译。链接时会链接.a文件
+  - -Wl,--whole-archive -lpthread -Wl,--no-whole-archive参数是为了解决gcc的一个bug，没有这一串参数时，pthread库的静态编译会有问题。
+
+```Makefile
+game:*.cpp
+	g++ -g -std=c++11 -pthread -Wl,--whole-archive -lpthread -Wl,--no-whole-archive $^ -o $@ -lprotobuf -lzinx -pthread -static
+```
+
+此时，只要是64位linux系统，都可以运行该程序。
+
+##### 步骤2 编写Dockerfile
+
+##### 测试
+
 
 
