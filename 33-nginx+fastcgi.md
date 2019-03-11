@@ -321,3 +321,52 @@ CGI 是所谓的短生存期应用程序，FastCGI 是所谓的长生存期应�
 像是一个常驻(long-live)型的CGI，它可以一直执行着，不会每次都要花费时间去fork一次(这是CGI最为人诟病的fork-and-execute 模式)。
 
 **FastCGI程序结构**
+
+![](/assets/FastCGI程序流程图.png)
+
+**FCGI库和spawn-cgi**
+
+上图可以看出，fast-cgi程序和cgi程序的相似度很大，但又不完全相同。fcgi库的出现统一了两者。
+
+fcgi是开发FastCGI程序常用的一个函数库：https://github.com/FastCGI-Archives/fcgi2.git
+
++ fcgi库把socket数据收发和编结FastCGI数据封装成函数。方便开发者着眼于业务处理。
++ fcgi库在解析完FastCGI数据后会将模拟CGI的规范，设置环境变量和重定向标准输入。
++ 利用fcgi编写的程序也可以当做cgi程序运行。
+
+这个fastcgi程序完成了一个返回客户端IP地址的功能。
+
+```c
+#include <stdlib.h>
+#include <fcgi_stdio.h>
+
+int main()
+{
+    while (FCGI_Accept() >= 0)
+    {
+        printf("Content-Type:text\r\n\r\n");
+        printf("clint ip is %s\r\n", getenv("REMOTE_ADDR"));
+
+    }
+
+    return 0;
+}
+```
+
+上边的代码中并没有体现守护进程和socket收发数据，所以我们需要借助一个fastcgi程序的管理器帮助。spawn-fcgi是一个通用的选择（apt下载安装）。
+
+命令`spawn-fcgi -a 127.0.0.1 -p 7777 -f test-cgi`的意思是：按照守护模式启动test-cgi程序，并且监听本地地址（127.0.0.1）的7777端口。
+
+## 3.3.4 组合测试
+
+**需求：** 用户访问http://XXXXXXXXX/ip时，显示用户的IP
+
+**步骤：**
+
+1. 使用fcgi库编写FastCGI程序（上边的例子）。编译成可执行文件test-cgi
+2. 执行`spawn-fcgi -a 127.0.0.1 -p 7777 -f test-cgi`启动FastCgi程序。
+3. 在nginx配置文件中增加如下配置后重启nginx（nginx -s  reload）
+
+
+
+
