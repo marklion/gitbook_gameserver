@@ -353,7 +353,29 @@ game:*.cpp
 
 ##### 步骤2 编写Dockerfile
 
+基于ubuntu基础镜像，拷贝游戏服务器程序和相关文件;向外暴露8899端口;设定执行点为游戏服务器进程。
+
+```
+FROM ubuntu
+WORKDIR /root/
+EXPOSE 8899
+COPY game random* ./
+CMD ["debug"]
+ENTRYPOINT ["./game"]
+```
+
 ##### 步骤3 测试
 
+1. 编译镜像
+2. 运行镜像，-d指定守护运行，-P指定端口随机映射
+3. 查看该容器映射的端口号，启动游戏测试
 
+```bash
+$ docker build  -t game_run .
+$ docker run -Pd game_run
+$ docker ps 
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS                     NAMES
+f8d541bc7917        game_run            "./game debug"      6 minutes ago       Up 6 minutes        0.0.0.0:32768->8899/tcp   confident_spence
+```
 
+用32768端口启动游戏客户端，测试OK
