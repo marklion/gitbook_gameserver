@@ -20,5 +20,5 @@
 * [3 多实例部署](3-duo-shi-li-bu-shu.md)
   * [3.1 商用项目](31-shang-yong-xiang-mu.md)
   * [3.2 docker](31-docker.md)
-* [3.3 Nginx+Fastcgi](33-nginx+fastcgi.md)
+  * [3.3 Nginx+Fastcgi](33-nginx+fastcgi.md)
 
