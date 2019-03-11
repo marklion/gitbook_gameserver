@@ -132,12 +132,65 @@ Nginx配置文件结构：
 |location|http服务中，某些特定的URL对应的一系列配置项|
 |mail|实现email相关的SMTP/IMAP/POP3代理时，共享的一些配置项|
 
+配置文件的生效阶段：
 
+![](/assets/Nginx工作流程.png)
 
 **重点关注server配置项和location配置项**
 
 通过不同的配置可以将nginx作为不同的角色使用。
 
-##### 反向代理
+##### 静态页面
+
+修改`/usr/share/nginx/html/index.html`为：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<title>this is itcast</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<h1>this is itcast</h1>
+</body>
+</html>
+```
+
+修改`/etc/nginx/nginx.conf`为
+
+```
+user www-data;
+worker_processes auto;
+pid /run/nginx.pid;
+
+events {
+	worker_connections 768;
+}
+
+http {
+    sendfile on;
+    tcp_nopush on;
+    tcp_nodelay on;
+    keepalive_timeout 65;
+    types_hash_max_size 2048;
+    access_log /var/log/nginx/access.log;
+    error_log /var/log/nginx/error.log;
+
+    server {
+        listen 80 default_server;
+        location / {
+            root /usr/share/nginx/html;
+            index index.html;
+        }
+    }
+}
+```
 
 
