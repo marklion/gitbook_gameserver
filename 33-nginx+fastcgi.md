@@ -378,12 +378,16 @@ location /cgi/ {
 ## 3.3.5 开发技巧
 
 + 使用fcgi库时的三要素：
+
   - `while (FCGI_Accept() >= 0)`循环内写业务
   - 用`getenv`和`fread(buf, sizeof(buf), 1, stdin)`获取用户的请求
-  - 用`printf`向用户展示数据；回复的数据格式大概是
+  - 用`printf`向用户展示数据；数据格式是
+  
     * 若干行回复数据头（最简形式`Content-Type:text\r\n`）
     * 一个空行
     * 回复数据体
 
++ spawn-cgi启动fastcgi程序时要和nginx的fastcgi_pass配置项对应好
++ 良好的设计是：不同目的的请求用不同的FastCGI程序处理。
 
 
