@@ -117,6 +117,7 @@ BSD许可协议允许用户免费使用Nginx、修改Nginx源码，然后再发�
 测试：`sudo nginx -t`
 启动：`sudo nginx`
 停止: `sudo nginx -s stop`
+重启：`sudo nginx -s reload`
 
 #### Nginx配置方式
 
@@ -357,7 +358,7 @@ int main()
 
 命令`spawn-fcgi -a 127.0.0.1 -p 7777 -f test-cgi`的意思是：按照守护模式启动test-cgi程序，并且监听本地地址（127.0.0.1）的7777端口。
 
-## 3.3.4 组合测试
+## 3.3.4 组合使用
 
 **需求：** 用户访问http://XXXXXXXXX/ip时，显示用户的IP
 
@@ -367,6 +368,22 @@ int main()
 2. 执行`spawn-fcgi -a 127.0.0.1 -p 7777 -f test-cgi`启动FastCgi程序。
 3. 在nginx配置文件中增加如下配置后重启nginx（nginx -s  reload）
 
+```
+location /cgi/ {
+    include /etc/nginx/fastcgi_params;
+    fastcgi_pass 127.0.0.1:7777;
+}
+```
+
+## 3.3.5 开发技巧
+
++ 使用fcgi库时的三要素：
+  - `while (FCGI_Accept() >= 0)`循环内写业务
+  - 用`getenv`和`fread(buf, sizeof(buf), 1, stdin)`获取用户的请求
+  - 用`printf`向用户展示数据；回复的数据格式大概是
+    * 若干行回复数据头（最简形式`Content-Type:text\r\n`）
+    * 一个空行
+    * 回复数据体
 
 
 
