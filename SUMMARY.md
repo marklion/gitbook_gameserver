@@ -22,4 +22,5 @@
   * [3.2 docker](31-docker.md)
   * [3.3 Nginx+Fastcgi](33-nginx+fastcgi.md)
   * [3.4 登陆服务器实现](34-deng-lu-fu-wu-qi-shi-xian.md)
+  * [3.5 QT实现登陆客户端](35-qtshi-xian-deng-lu-ke-hu-duan.md)
 
