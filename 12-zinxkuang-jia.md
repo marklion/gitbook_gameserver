@@ -10,6 +10,8 @@ github路径：[https://github.com/marklion/Game\_zinx](https://github.com/markl
 
    > 一般地，项目的github主页上会列出README文档。
    
+   ![](/assets/zinx框架图.png)
+   
 2. 搭建开发环境，安装vscode进行编码，调试
 3. 运行文档中的案例并做一定扩展
 
