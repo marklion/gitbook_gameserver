@@ -200,9 +200,9 @@ int GameProtocol::GetLittleEndNumber(const unsigned char * pucData)
 {
     int iRet = 0;
     iRet = pucData[0];
-    iRet += pucData[1];
-    iRet += pucData[2];
-    iRet += pucData[3];
+    iRet += pucData[1] * 0xff;
+    iRet += pucData[2] * 0xffff;
+    iRet += pucData[3] * 0xffffff;
 
     return iRet;
 }
